@@ -1,0 +1,13 @@
+MIDlet-4: Log Demo,/J4ME.png,org.j4me.examples.log.LogDemoMidlet
+MIDlet-3: GPS Demo,/J4ME.png,org.j4me.examples.bluetoothgps.GPSDemoMidlet
+MIDlet-2: UI Demo,/J4ME.png,org.j4me.examples.ui.UIDemoMidlet
+MIDlet-1: Tests,/J4ME.png,org.j4me.TestsMidlet
+MIDlet-Permissions-Opt: javax.microedition.io.Connector.bluetooth.client,javax.microedition.location.Location,javax.microedition.io.Connector.http
+MIDlet-Icon: /J4ME.png
+MicroEdition-Configuration: CLDC-1.1
+MIDlet-Version: 1.0.0
+URL: http://www.j4me.org/
+MIDlet-Vendor: J4ME.org
+MIDlet-Name: J4ME
+MIDlet-Description: J4ME library examples
+MicroEdition-Profile: MIDP-2.0

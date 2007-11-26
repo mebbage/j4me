@@ -1,0 +1,97 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+<html>
+<head>
+</head>
+<body bgcolor="white">
+
+Extends the JSR-179 Location API to support Bluetooth GPS devices and improve consistency
+across vendor implementations.  This API helps in the following use cases:
+<ol>
+
+ <li>Most devices do not have JSR-179 available.  Building against that code normally
+     would result in class not found errors and prevent the application from running.
+     This implementation handles that so if you write against it and the device does
+     not have JSR-179 your application will still run.
+
+ <li>To get location information on phones that do not have JSR-179 the only way is
+     communicating to a separate Bluetooth GPS device.  This API supports that by
+     providing the Bluetooth address to the <code>Criteria</code> object.  The API
+     also supports dynamic discovery of nearby Bluetooth devices (within 10 meters)
+     to get that address.
+ 
+ <li>JSR-179 implementations vary between vendors making code that runs on one device
+     fail on another.  For example BlackBerry phones raise location events on their
+     main UI thread so taking too long to process them can result in your application
+     crashing.  The J4ME implementation obscures these problems and gives a consistent
+     implementation so you can truly write once and run anywhere.
+
+ <li>Location information available on most devices is based on cell tower triangulation
+     which costs money to use and is only accurate to about 60 meters.  To get free
+     and/or more readings within 1 meter you need to use Bluetooth GPS.
+
+</ol>
+
+<p><b>Not all of JSR-179 has been implemented.</b>  There are some missing classes but
+they are simple to add if you need them (and remember to contribute your work back!).
+Specifically the landmark store, proximity listener, a few other methods are not
+complete.  None of those require GPS knowledge to implement.
+
+<h2>Recommended Bluetooth GPS</h2>
+
+<table border="0">
+ <tr>
+  <td valign="top">
+Bluetooth GPS pucks are all fairly similar.  There are slight variations in chipsets
+but the main differentiators are price, battery life, and packaging.  We have tried a
+dozen of these over the past year and as of this writing (Nov 21, 2007) our recommendation
+is the OnCourse Edition 3 which costs $50 and is about the size of matchbox.  You can
+purchase it through the link on the right (it comes with a car charger but not a wall charger;
+if you do not have a mini-USB charger a cheap one that works with it is listed alongside).
+  </td>
+  <td width="70px" style="padding-left: 20px;">
+   <iframe src="http://rcm.amazon.com/e/cm?t=scoout-20&o=1&p=8&l=as1&asins=B000U3JNJG&fc1=000000&IS2=1&lt1=_blank&lc1=0000FF&bc1=000000&bg1=FFFFFF&f=ifr" style="width:120px;height:240px;" scrolling="no" marginwidth="0" marginheight="0" frameborder="0"></iframe>
+  </td>
+  <td width="70px" style="padding-left: 20px;">
+   <iframe src="http://rcm.amazon.com/e/cm?t=scoout-20&o=1&p=8&l=as1&asins=B0009H2M1Y&fc1=000000&IS2=1&lt1=_blank&lc1=0000FF&bc1=000000&bg1=FFFFFF&f=ifr" style="width:120px;height:240px;" scrolling="no" marginwidth="0" marginheight="0" frameborder="0"></iframe>
+  </td>
+ </tr>
+</table>
+
+<h2>Porting</h2>
+
+<p>Porting code written against the Location API (JSR-179) to J4ME is very simple.
+Search for "<code>javax.microedition.location</code>" and replace with
+"<code>org.j4me.bluetoothgps</code>".
+
+<p>That will insulate you from JSR-179 implementation variations but it will not
+be able to connect to Bluetooth GPS devices.  For that you must call
+<code>Criteria.setRemoteDeviceAddress(address)</code> where <code>address</code>
+is the Bluetooth GPS puck's address.  See the example for more information
+including how to get the Bluetooth address.
+
+<h2>Example</h2>
+
+<p>An example is provided in the <code>/examples</code> folder under the
+<code>org.j4me.examples.bluetoothgps</code> package.  It is a simple pedometer
+application that also outputs the various location data as it is received.
+
+<p>The example illustrates how to:
+<ul>
+ <li>Use JSR-179
+ <li>Connect to built-in location data
+ <li>Connect to a Bluetooth GPS device
+ <li>Takes advantage of J4ME UI and logging
+</ul>
+  
+<h2>Related Documentation</h2>
+
+<ul>
+ <li><a href="http://developers.sun.com/mobility/apis/articles/location/">SUN's introduction to Location-Based Services</a>
+ <li><a href="http://www.forum.nokia.com/document/Java_ME_Developers_Library_v1/GUID-4AEC8DAF-DDCC-4A30-B820-23F2BA60EA52/overview-summary.html">Official JSR-179 JavaDoc</a>
+ <li><a href="http://jcp.org/en/jsr/detail?id=179">JSR-179 Java Specification Request page</a>
+</ul>
+
+<!-- Put @see and @since tags down here. -->
+
+</body>
+</html>

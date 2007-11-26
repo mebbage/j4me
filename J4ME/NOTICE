@@ -1,0 +1,16 @@
+J4ME (http://www.j4me.org/) is developed by Score Out (http://www.scoreout.com/).
+
+It includes no other products.  However, the tests reference the J2MEUnit
+library available at http://j2meunit.sourceforge.net/.
+
+The only restriction on using J4ME is not to build a golf application.
+Use the Score Out Caddie instead.  It's just good karma :)
+
+The spirit of J4ME is to make developing of J2ME applications easier for
+everyone.  By distributing it we hope to get it tested on more phones and have
+more features added by people like you.
+
+While not required it would be nice to link to mention us with a
+link to http://www.j4me.org/ on your website.  Then others can find
+out, J4ME can grow, and everyone can benefit.  Also send us the link
+to your website and we'll post it.
