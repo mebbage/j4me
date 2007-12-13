@@ -111,35 +111,55 @@ public class Stopwatch
 	}
 
 	/**
+	 * Called when any key is pressed.
+	 * 
+	 * @see org.j4me.ui.DeviceScreen#keyPressed(int)
+	 */
+	protected void keyPressed (int keyCode)
+	{
+		// Let the fire key start/stop the timer.
+		if ( keyCode == FIRE )
+		{
+			acceptNotify();
+		}
+			
+		// Forward the event for further processing.
+		super.keyPressed( keyCode );
+	}
+
+	/**
 	 * Implements stopwatch functionality.
 	 */
-	private class StopwatchTimerTask
+	private final class StopwatchTimerTask
 		extends TimerTask
 	{
 		public void run ()
 		{
-			long duration = System.currentTimeMillis() - startTime;
-			long milliseconds = duration % 1000;
-			long seconds = duration / 1000;
-			long minutes = seconds / 60;
-			seconds %= 60;
-
-			StringBuffer buffer = new StringBuffer();
-			buffer.append( minutes );
-			buffer.append( ":" );
-			
-			if ( seconds < 10 ) buffer.append( "0" );
-			buffer.append( seconds );
-			buffer.append( "." );
-			
-			if ( milliseconds < 10 ) buffer.append( "00" );
-			else if ( milliseconds < 100 ) buffer.append( "0" );
-			buffer.append( milliseconds );
-			
-			String time = buffer.toString();
-			elapsedTime.setLabel( time );
-			
-			repaint();
+			synchronized ( Stopwatch.this )
+			{
+				long duration = System.currentTimeMillis() - startTime;
+				long milliseconds = duration % 1000;
+				long seconds = duration / 1000;
+				long minutes = seconds / 60;
+				seconds %= 60;
+	
+				StringBuffer buffer = new StringBuffer();
+				buffer.append( minutes );
+				buffer.append( ":" );
+				
+				if ( seconds < 10 ) buffer.append( "0" );
+				buffer.append( seconds );
+				buffer.append( "." );
+				
+				if ( milliseconds < 10 ) buffer.append( "00" );
+				else if ( milliseconds < 100 ) buffer.append( "0" );
+				buffer.append( milliseconds );
+				
+				String time = buffer.toString();
+				elapsedTime.setLabel( time );
+				
+				repaint();
+			}
 		}
 	}
 
@@ -180,7 +200,7 @@ public class Stopwatch
 	 * Paints the blank area of the canvas.  This just shows how long
 	 * the timer has been running.
 	 */
-	protected void paint (Graphics g)
+	protected synchronized void paint (Graphics g)
 	{
 		int width = getWidth();
 		int height = getHeight();
@@ -192,7 +212,7 @@ public class Stopwatch
 		
 		// Vertically center the label.
 		int labelY = (height - labelHeight) / 2;
-		
+			
 		// Paint the label.
 		elapsedTime.paint( g, theme, this, 0, labelY, width, height, true );
 	}

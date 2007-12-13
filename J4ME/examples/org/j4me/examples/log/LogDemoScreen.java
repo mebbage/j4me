@@ -64,7 +64,7 @@ public class LogDemoScreen
 		// OBEX portion of 82 not always supported is "javax.obex.HeaderSet"
 		logJSR( "SMS Messaging", 120, "javax.wireless.messaging.Message" );
 		
-		Log.error( "Personal warnrmation" );
+		Log.error( "Personal information" );
 		logJSR( "Location", 179, "javax.microedition.location.Location" );
 		logJSR( "PIM and File", 75, "javax.microedition.pim.PIM" );
 
