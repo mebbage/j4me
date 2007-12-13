@@ -2,6 +2,7 @@ package org.j4me.ui;
 
 import java.util.*;
 import javax.microedition.lcdui.*;
+import org.j4me.logging.*;
 
 /**
  * The <code>DeviceScreen</code> class is a base class for any screen that needs complete
@@ -450,9 +451,6 @@ public abstract class DeviceScreen
 	 * Returns the width of the usuable portion of this canvas.  The usable
 	 * portion excludes anything on the sides of the screen such as scroll
 	 * bars.
-	 * <p>
-	 * This is not initialized until after the screen is painted.  Therefore it
-	 * <i>cannot</i> be used from the <code>onSelection</code> method.
 	 * 
 	 * @return The number of pixels wide the usable portion of the canvas is.
 	 */
@@ -465,9 +463,6 @@ public abstract class DeviceScreen
 	 * Returns the height of the usuable portion of this canvas.  The usable
 	 * portion excludes the title area and menu bar unless this canvas has been
 	 * set to full screen mode.
-	 * <p>
-	 * This is not initialized until after the screen is painted.  Therefore it
-	 * <i>cannot</i> be used from the <code>onSelection</code> method.
 	 * 
 	 * @return The number of pixels high the usable portion of the canvas is.
 	 */
@@ -495,6 +490,12 @@ public abstract class DeviceScreen
 	
 	/**
 	 * Gets the width of the entire screen in pixels.
+	 * <p>
+	 * <i>Platform bug note.</i>  Motorola and early Nokia phones return the
+	 * incorrect size until after the first screen has actually been displayed.
+	 * So, for example, calling this from a constructor before any screen has
+	 * been displayed will give incorrect data.  The workaround is to put up
+	 * another screen first, such as a splash screen.
 	 * 
 	 * @return The number of pixels wide the entire screen is.
 	 */
@@ -507,6 +508,12 @@ public abstract class DeviceScreen
 	 * Gets the height of the entire screen in pixels.  This includes
 	 * the title area at the top of the screen and menu bar at the bottom.
 	 * Use <code>getHeight</code> to get the actual usable area of the canvas.
+	 * <p>
+	 * <i>Platform bug note.</i>  Motorola and early Nokia phones return the
+	 * incorrect size until after the first screen has actually been displayed.
+	 * So, for example, calling this from a constructor before any screen has
+	 * been displayed will give incorrect data.  The workaround is to put up
+	 * another screen first, such as a splash screen.
 	 * 
 	 * @return The number of pixels high the entire screen is.
 	 */
@@ -841,22 +848,6 @@ final class CanvasWrapper
 	 * and dividing it by this number (e.g. 1000 / 250 = 4 events per second).
 	 */
 	private static final short REPEAT_PERIOD = 200;
-	
-	/**
-	 * The width of the entire screen in pixels.
-	 * <p>
-	 * We cannot rely on getting this from <code>Canvas.getWidth</code>.  For
-	 * more information see the <code>sizeChanged</code> method below.
-	 */
-	private static int screenWidth = -1;
-	
-	/**
-	 * The height of the entire screen in pixels.
-	 * <p>
-	 * We cannot rely on getting this from <code>Canvas.getHeight</code>.  For
-	 * more information see the <code>sizeChanged</code> method below.
-	 */
-	private static int screenHeight = -1;
 
 	/**
 	 * When <code>true</code> this is running on a BlackBerry device.  When
@@ -888,6 +879,14 @@ final class CanvasWrapper
 	 * closely so the application resembles others on the phone.
 	 */
 	private static boolean ibmJ9;
+	
+	/**
+	 * When <code>true</code> this is running on Tao's JVM.  When <code>false</code>
+	 * it is not.
+	 * <p>
+	 * The Tao JVM runs on Windows Mobile and behaves similarly to IBM's J9.
+	 */
+	private static boolean tao;
 	
 	/**
 	 * The screen that uses this object for screen operations.
@@ -926,15 +925,6 @@ final class CanvasWrapper
 	 * menu work is in progress.
 	 */
 	private boolean highlightRightMenu;
-	
-	/**
-	 * A flag to indicate if the <code>repaint</code> method has been called from
-	 * <code>paint</code> in an attempt to get the size of the screen.  Some
-	 * implementations (e.g. BlackBerry) do not call <code>sizeChanged</code> after
-	 * setting the screen to full-screen mode.  This prevents an infinite
-	 * loop in those cases.
-	 */
-	private boolean calledRepaint;
 
 	/**
 	 * When we do not paint the menu bar, such as with BlackBerries and IBM's
@@ -959,6 +949,9 @@ final class CanvasWrapper
 	 */
 	static
 	{
+        String platform = System.getProperty( "microedition.platform" );
+        platform = platform.toLowerCase();
+        
 		// Check if running on a BlackBerry.
 		try
 		{
@@ -980,6 +973,16 @@ final class CanvasWrapper
 		{
 			ibmJ9 = false;
 		}
+		
+		// Check if running on Tao's JVM.
+		if ( platform.indexOf("intent") > -1 )
+		{
+			tao = true;
+		}
+		else
+		{
+			tao = false;
+		}
 	}
 	
 	/**
@@ -999,54 +1002,6 @@ final class CanvasWrapper
 		
 		// Register for getting LCDUI menu commands.
 		setCommandListener( this );
-	}
-	
-	/**
-	 * Gets the width of the entire screen in pixels.
-	 * 
-	 * @return The number of pixels wide the entire screen is.
-	 */
-	public int getWidth ()
-	{
-		// Do we know the screen size yet?
-		if ( screenWidth < 0 )
-		{
-			// FIXME Screen width (if have not shown a screen yet).
-			//  On some implementations, like Motorola, this is wrong
-			//  because it does not take into account full screen mode.
-			
-			// Just use what the implemenation says is the screen size.
-			return super.getWidth();
-		}
-		else
-		{
-			// Return the screen size.
-			return screenWidth;
-		}
-	}
-	
-	/**
-	 * Gets the height of the entire screen in pixels.
-	 * 
-	 * @return The number of pixels high the entire screen is.
-	 */
-	public int getHeight ()
-	{
-		// Do we know the screen size yet?
-		if ( screenHeight < 0 )
-		{
-			// FIXME Screen width (if have not shown a screen yet).
-			//  On some implementations, like Motorola, this is wrong
-			//  because it does not take into account full screen mode.
-			
-			// Just use what the implemenation says is the screen size.
-			return super.getHeight();
-		}
-		else
-		{
-			// Return the screen size.
-			return screenHeight;
-		}
 	}
 
 	/**
@@ -1194,6 +1149,16 @@ final class CanvasWrapper
 	 */
 	private int translateKeyCode (int key)
 	{
+		// Translate key codes used on the Tao JVM.
+		if ( tao )
+		{
+			// Center joystick button is a Return.
+			if ( key == 13 )
+			{
+				return FIRE;
+			}
+		}
+		
 		// Is it a normal key?
 		//   BlackBerry devices give the trackwheel and trackball movements
 		//   as values through 6 and getGameAction does not translate them.
@@ -1386,11 +1351,11 @@ final class CanvasWrapper
 	 */
 	public void setTitle (String title)
 	{
-		// Are we running on IBM's J9 JVM?
-		//   IBM's J9 always shows a title bar.  We might as well use that
-		//   instead of painting a duplicate on our own.
-		if ( ibmJ9 )
+		// Does this JVM support our title bar feature?
+		if ( supportsTitleBar() == false )
 		{
+			// These JVMs always shows a title bar.  We might as well use that
+			// instead of painting a duplicate on our own.
 			super.setTitle( title );
 		}
 		
@@ -1413,15 +1378,16 @@ final class CanvasWrapper
 	 */
 	public void setMenuText (String left, String right)
 	{
-		// Are we running on a BlackBerry or IBM's J9 JVM?
-		//   BlackBerry phones do not have MIDP 2.0 left and right menu buttons.
-		//   We must capture the BlackBerry phone's "Menu" and "Return" buttons
-		//   using the LCDUI menu functionality.
-		//
-		//   IBM's J9 does not forward the left and right menu button codes to
-		//   us.  We have to use LCDUI menu functionality.
-		if ( blackberry || ibmJ9 )
+		// Does this JVM support our own menu bar?
+		if ( supportsMenuBar() == false )
 		{
+			// BlackBerry phones do not have MIDP 2.0 left and right menu buttons.
+			// We must capture the BlackBerry phone's "Menu" and "Return" buttons
+			// using the LCDUI menu functionality.
+			//
+			// IBM's J9 does not forward the left and right menu button codes to
+			// us.  We have to use LCDUI menu functionality.
+			
 			// Remove the existing menu commands.
 			if ( lcduiLeftMenuCommand != null )
 			{
@@ -1476,7 +1442,7 @@ final class CanvasWrapper
 				
 				// Add a dummy left menu for IBM's J9 JVM.  Otherwise the right
 				// menu would actually be on the left.
-				if ( ibmJ9 && (left == null) )
+				if ( (ibmJ9 || tao) && (left == null) )
 				{
 					lcduiLeftMenuCommand = new Command( "", Command.CANCEL, 1 );
 					addCommand( lcduiLeftMenuCommand );
@@ -1522,9 +1488,9 @@ final class CanvasWrapper
 	 */
 	public boolean supportsMenuBar ()
 	{
-		if ( blackberry || ibmJ9 )
+		if ( blackberry || ibmJ9 || tao )
 		{
-			// BlackBerry phones do not show a menu bar at the bottom of the
+			// These JVMs do not show our menu bar at the bottom of the
 			// screen.  Instead they use the LCDUI menu system.
 			return false;
 		}
@@ -1545,9 +1511,9 @@ final class CanvasWrapper
 	 */
 	public boolean supportsTitleBar ()
 	{
-		if ( ibmJ9 )
+		if ( ibmJ9 || tao )
 		{
-			// IBM's J9 always shows a title bar.  We might as well use it.
+			// These JVMs always show a title bar.  We might as well use it.
 			return false;
 		}
 		else
@@ -1575,50 +1541,6 @@ final class CanvasWrapper
 		super.hideNotify();
 	}
 
-	/**
-	 * Called by J2ME once the <code>setFullScreen</code> call in the constructor
-	 * takes effect.  Here we get the real width and height of the canvas.
-	 * <p>
-	 * Some implementations will give it from the <code>Canvas.getWidth</code>
-	 * and <code>Canvas.getHeight</code> methods (e.g. Sony Ericsson) while others
-	 * will not (e.g. Motorola and early Nokia).  The only way to get it
-	 * for all implemenations is to capture it here.
-	 * 
-	 * @param w is the width of canvas in pixels.
-	 * @param h is the height of canvas in pixels.
-	 * 
-	 * @see javax.microedition.lcdui.Canvas#sizeChanged(int, int)
-	 */
-	protected final void sizeChanged (int w, int h)
-	{
-		// Do we know the screen width and height yet?
-		if ( screenWidth < 0 )
-		{
-			// Get the width of the entire screen.
-			if ( w <= 0 )
-			{
-				screenWidth = super.getWidth();
-			}
-			else
-			{
-				// Motorla and early Nokia give correct width here.
-				screenWidth = w;
-			}
-			
-			// Get the height of the entire screen.
-			if ( h <= 0 )
-			{
-				// Sun WTK emulator passes in a negative h value.
-				screenHeight = super.getHeight();
-			}
-			else
-			{
-				// Motorla and early Nokia give correct height here.
-				screenHeight = h;
-			}
-		}
-	}
-	
 	/**
 	 * Forces a repaint of the menu bar.
 	 * 
@@ -1655,154 +1577,142 @@ final class CanvasWrapper
 	 */
 	protected void paint (Graphics g)
 	{
-		// If we don't have the screen's actual width yet, wait for a
-		// sizeChanged() call before painting.
-		if ( screenWidth < 0 )
+		try
 		{
-			if ( calledRepaint == false )
-			{
-				// Try using repaint() to get sizeChanged() called.
-				calledRepaint = true;
-				super.repaint();
-				return;
-			}
-			else
-			{
-				// repaint() did not get sizeChanged() to work, call it
-				// ourselves.  This platform should have the correct screen
-				// sizes already.
-				screenWidth = super.getWidth();
-				screenHeight = super.getHeight();
-			}
-		}
-		
-		// Get some painting attributes.
-		Theme theme = UIManager.getTheme();
-		
-		int width = getWidth();
-		int height = getHeight();
-
-		int titleHeight = 0;
-		int menuHeight = 0;
-		
-		String title = null;
-		String leftMenuText = null;
-		String rightMenuText = null;
-
-		// Get the original clip.
-		int clipX = g.getClipX();
-		int clipY = g.getClipY();
-		int clipWidth = g.getClipWidth();
-		int clipHeight = g.getClipHeight();
-		
-		// Paint the title bar and/or menu bar?
-		if ( master.isFullScreenMode() == false )
-		{
-			// Paint the title bar at the top of the screen.
-			title = master.getTitle();
+			// Get some painting attributes.
+			Theme theme = UIManager.getTheme();
 			
-			if ( master.hasTitleBar() )
-			{
-				// We'll paint the title after the canvas area.
-				titleHeight = theme.getTitleHeight();
-			}
-			
-			// Paint the menu bar at the bottom of the screen.
-			if ( master.hasMenuBar() )
-			{
-				// Set the menu text.
-				leftMenuText = master.getLeftMenuText();
-				rightMenuText = master.getRightMenuText();
-			
-				if ( leftMenuText == null )
-				{
-					leftMenuText = "";
-				}
-				
-				if ( rightMenuText == null )
-				{
-					rightMenuText = "";
-				}
-				
-				// Set the height of the menu.
-				menuHeight = theme.getMenuHeight();
-			}
-
-			// Set the graphics object for painting the canvas area.
-			height = height - titleHeight - menuHeight;
-			
-			g.translate( 0, titleHeight );
-			
-			//   The *2 below is to work around a bug in the Sun WTK 2.5 emulator.
-			//   It clips rounded drawings near the bottom edge.  By making the clip
-			//   bigger these images will appear normally.  If the canvas area paints
-			//   too far down, it will either run off the bottom of the screen or get
-			//   painted over by paintMenuBar().  In either case the end result is
-			//   the same as setting the clip area below correctly.
-			g.clipRect( 0, 0, width, (height + titleHeight) * 2 );
-		}
-		
-		// Paint the canvas area.
-		if ( DeviceScreen.intersects(g, 0, 0, width, height) )
-		{
-			master.paintBackground( g );
-		
-			g.setFont( theme.getFont() );
-			g.setColor( theme.getFontColor() );
-			master.paint( g );
-		}
-
-		// Restore the original graphics object.
-		g.translate( 0, -titleHeight );
-		g.setClip( clipX, clipY, clipWidth, clipHeight );
-
-		// Paint the title bar.
-		//  We do this after the canvas so it will paint over any
-		//  canvas spillage.
-		if ( titleHeight > 0 )
-		{
-			if ( DeviceScreen.intersects(g, 0, 0, width, titleHeight) )
-			{
-				// Set the graphics object for painting the title bar.
-				g.clipRect( 0, 0, width, titleHeight );
-				
-				// Actually paint the title bar.
-				master.paintTitleBar( g, title, width, titleHeight );
+			int width = getWidth();
+			int height = getHeight();
 	
-				// Restore the original graphics object.
-				g.setClip( clipX, clipY, clipWidth, clipHeight );
+			int titleHeight = 0;
+			int menuHeight = 0;
+			
+			String title = null;
+			String leftMenuText = null;
+			String rightMenuText = null;
+	
+			// Get the original clip.
+			int clipX = g.getClipX();
+			int clipY = g.getClipY();
+			int clipWidth = g.getClipWidth();
+			int clipHeight = g.getClipHeight();
+			
+			// Paint the title bar and/or menu bar?
+			if ( master.isFullScreenMode() == false )
+			{
+				// Paint the title bar at the top of the screen.
+				title = master.getTitle();
+				
+				if ( master.hasTitleBar() )
+				{
+					// We'll paint the title after the canvas area.
+					titleHeight = theme.getTitleHeight();
+				}
+				
+				// Paint the menu bar at the bottom of the screen.
+				if ( master.hasMenuBar() )
+				{
+					// Set the menu text.
+					leftMenuText = master.getLeftMenuText();
+					rightMenuText = master.getRightMenuText();
+				
+					if ( leftMenuText == null )
+					{
+						leftMenuText = "";
+					}
+					
+					if ( rightMenuText == null )
+					{
+						rightMenuText = "";
+					}
+					
+					// Set the height of the menu.
+					menuHeight = theme.getMenuHeight();
+				}
+	
+				// Set the graphics object for painting the canvas area.
+				height = height - titleHeight - menuHeight;
+				
+				g.translate( 0, titleHeight );
+				g.clipRect( 0, 0, width, height );
+			}
+			
+			// Paint the canvas area.
+			if ( DeviceScreen.intersects(g, 0, 0, width, height) )
+			{
+				master.paintBackground( g );
+			
+				g.setFont( theme.getFont() );
+				g.setColor( theme.getFontColor() );
+				master.paint( g );
+			}
+	
+			// Restore the original graphics object.
+			g.translate( 0, -titleHeight );
+			g.setClip( clipX, clipY, clipWidth, clipHeight );
+	
+			// Paint the title bar.
+			//  We do this after the canvas so it will paint over any
+			//  canvas spillage.
+			if ( titleHeight > 0 )
+			{
+				if ( DeviceScreen.intersects(g, 0, 0, width, titleHeight) )
+				{
+					// Set the graphics object for painting the title bar.
+					g.clipRect( 0, 0, width, titleHeight );
+					
+					// Actually paint the title bar.
+					master.paintTitleBar( g, title, width, titleHeight );
+		
+					// Restore the original graphics object.
+					g.setClip( clipX, clipY, clipWidth, clipHeight );
+				}
+			}
+	
+			// Paint the menu bar.
+			if ( menuHeight > 0 )
+			{
+				int y = getHeight() - menuHeight;
+				
+				if ( DeviceScreen.intersects(g, 0, y, width, menuHeight) )
+				{
+					// Set the graphics object for painting the menu bar.
+					g.translate( 0, y );
+					g.clipRect( 0, 0, width, menuHeight );
+	
+					// Clear the background first.
+					//   On the Sony Ericsson w810i things drawn accidentally
+					//   over the menu space can show through gradient backgrounds.
+					//   Clear the area completely first.
+					int menuBackgroundColor = theme.getMenuBarBackgroundColor();
+					g.setColor( menuBackgroundColor );
+					g.fillRect( 0, 0, width, menuHeight );
+					
+					// Actually paint the menu bar.
+					master.paintMenuBar( g,
+							leftMenuText, highlightLeftMenu,
+							rightMenuText, highlightRightMenu, 
+							width, menuHeight );
+					
+					// Restore the original graphics object.
+					g.translate( 0, -y );
+					g.setClip( clipX, clipY, clipWidth, clipHeight );
+				}
 			}
 		}
-
-		// Paint the menu bar.
-		if ( menuHeight > 0 )
+		catch (Throwable t)
 		{
-			int y = getHeight() - menuHeight;
+			// Unhandled exception in paint() will crash an application and not
+			// tell you why.  This lets the programmer know what caused the problem.
+			String name = master.getTitle();
 			
-			if ( DeviceScreen.intersects(g, 0, y, width, menuHeight) )
+			if ( name == null )
 			{
-				// Set the graphics object for painting the menu bar.
-				g.translate( 0, y );
-				g.clipRect( 0, 0, width, menuHeight );
-
-				// Clear the background first.
-				//   On the Sony Ericsson w810i things drawn accidentally
-				//   over the menu space can show through gradient backgrounds.
-				//   Clear the area completely first.
-				int menuBackgroundColor = theme.getMenuBarBackgroundColor();
-				g.setColor( menuBackgroundColor );
-				g.fillRect( 0, 0, width, menuHeight );
-				
-				// Actually paint the menu bar.
-				master.paintMenuBar( g,
-						leftMenuText, highlightLeftMenu,
-						rightMenuText, highlightRightMenu, 
-						width, menuHeight );
-				
-				// Restore the original graphics object.
-				g.translate( 0, -y );
-				g.setClip( clipX, clipY, clipWidth, clipHeight );
+				name = master.getClass().getName();
 			}
+			
+			Log.warn("Unhandled exception in paint for " + name, t);
 		}
 	}
 }
