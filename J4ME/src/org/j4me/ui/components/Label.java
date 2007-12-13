@@ -90,7 +90,7 @@ public class Label
 	 * @param text is the string to display.  If <code>null</code> the label will
 	 *  be hidden.
 	 */
-	public void setLabel (String text)
+	public synchronized void setLabel (String text)
 	{
 		this.text = text;
 		this.lines = null;
@@ -133,7 +133,7 @@ public class Label
 	 *  
 	 * @see Theme#getFont()
 	 */
-	public void setFont (Font font)
+	public synchronized void setFont (Font font)
 	{
 		this.font = font;
 		this.lines = null;
@@ -193,7 +193,7 @@ public class Label
 	 * 
 	 * @see org.j4me.ui.components.Component#paintComponent(Graphics, Theme, int, int, boolean)
 	 */
-	protected void paintComponent (Graphics g, Theme theme, int width, int height, boolean selected)
+	protected synchronized void paintComponent (Graphics g, Theme theme, int width, int height, boolean selected)
 	{
 		if ( text != null )
 		{

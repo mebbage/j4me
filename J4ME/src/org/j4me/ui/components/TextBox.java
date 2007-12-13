@@ -511,10 +511,24 @@ public class TextBox
 	 */
 	protected void select ()
 	{
-		// Show the system's text entry screen.
+		// Create a text entry screen using the LCDUI.
+		//   We use the LCDUI because we can't provide this functionality
+		//   on all phones by painting ourselves.  For instance Motorola
+		//   phones provide special menus for deleting characters because
+		//   they do not have a dedicated button.
+		//
+		//   There is a problem with ProGuard 4.0 optimizations.  We need
+		//   to actually pass in the label and contents strings instead of
+		//   having them collected by the constructor of TextInput.  It
+		//   does not work and throws an exception without doing this to
+		//   trick the optimizer.
 		DeviceScreen current = UIManager.getScreen();
-		TextInput entry = new TextInput( current, this, constraints );
-		
+		String label = getLabel();
+		String contents = getString();
+		int maxSize = getMaxSize();
+		TextInput entry = new TextInput( current, this, label, contents, maxSize, constraints );
+
+		// Display the text entry screen.
 		Display display = UIManager.getDisplay();
 		display.setCurrent( entry );
 	}
@@ -540,36 +554,38 @@ public class TextBox
 		/**
 		 * The screen that invoked this one.
 		 */
-		private DeviceScreen parent;
+		private final DeviceScreen parent;
 		
 		/**
 		 * The component this screen is collecting data for.
 		 */
-		private TextBox box;
+		private final TextBox component;
 
 		/**
 		 * Creates a native system input screen for text.
 		 * 
 		 * @param parent is the screen that invoked this one.
 		 * @param box is the component on <code>parent</code> this input is for.
+		 * @param label is the title for the input.
+		 * @param contents is the initial value of the contents.
+		 * @param maxSize is the maximum number of characters that can be entered.
 		 * @param constraints are the options that effect the type of data
 		 *  that can be entered.
 		 */
-		public TextInput (DeviceScreen parent, TextBox box, int constraints)
+		public TextInput (DeviceScreen parent, TextBox box, String label, String contents, int maxSize, int constraints)
 		{
-			super(
-					box.getLabel(),
-					box.getString(),
-					box.getMaxSize(),
-					constraints );
+			super( label,
+				   contents,
+				   maxSize,
+				   constraints );
 			
 			// Record the owners.
 			this.parent = parent;
-			this.box = box;
+			this.component = box;
 
 			// Add the menu buttons.
 			Theme theme = UIManager.getTheme();
-			
+
 			String cancelText = theme.getMenuTextForCancel();
 			cancel = new Command( cancelText, Command.CANCEL, 1 );
 			addCommand( cancel );
@@ -578,7 +594,7 @@ public class TextBox
 			ok = new Command( okText, Command.OK, 2 );
 			addCommand( ok );
 			
-			setCommandListener(this);
+			setCommandListener( this );
 		}
 
 		/**
@@ -590,7 +606,7 @@ public class TextBox
 			{
 				// Update the contents of owning box.
 				String input = this.getString();
-				box.setString( input );
+				component.setString( input );
 			}
 
 			// Return to the parent screen.
