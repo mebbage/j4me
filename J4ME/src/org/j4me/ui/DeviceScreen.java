@@ -1149,14 +1149,10 @@ final class CanvasWrapper
 	 */
 	private int translateKeyCode (int key)
 	{
-		// Translate key codes used on the Tao JVM.
-		if ( tao )
+		// Some phones have a bug where they treat the FIRE key as "Enter". 
+		if ( tao && (key == 13) )
 		{
-			// Center joystick button is a Return.
-			if ( key == 13 )
-			{
-				return FIRE;
-			}
+			return DeviceScreen.FIRE;
 		}
 		
 		// Is it a normal key?
