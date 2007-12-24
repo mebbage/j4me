@@ -5,6 +5,6 @@
 	<classpathentry kind="src" path="tests"/>
 	<classpathentry kind="src" path="res"/>
 	<classpathentry kind="con" path="J2MELIB"/>
-	<classpathentry exported="true" kind="lib" path="/Build/lib/J2MEUnit-1.1.1/j2meunit.jar"/>
+	<classpathentry kind="lib" path="C:/Documents and Settings/Dean/My Documents/Golf/code/Build/lib/J2MEUnit-1.1.1/j2meunit.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

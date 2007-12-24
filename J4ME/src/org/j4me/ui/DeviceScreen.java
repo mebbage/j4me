@@ -958,7 +958,7 @@ final class CanvasWrapper
 			Class.forName( "net.rim.device.api.ui.UiApplication" );
 			blackberry = true;
 		}
-		catch (ClassNotFoundException e)
+		catch (Throwable e)  // ClassNotFoundException, NoClassDefFoundError
 		{
 			blackberry = false;
 		}
@@ -969,7 +969,7 @@ final class CanvasWrapper
 			Class.forName( "java.lang.J9VMInternals" );
 			ibmJ9 = true;
 		}
-		catch (ClassNotFoundException e)
+		catch (Throwable e)  // ClassNotFoundException, NoClassDefFoundError
 		{
 			ibmJ9 = false;
 		}

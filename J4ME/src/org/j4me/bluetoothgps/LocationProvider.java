@@ -301,7 +301,7 @@ public abstract class LocationProvider
 		{
 			Class.forName("javax.microedition.location.LocationProvider");
 		}
-		catch (ClassNotFoundException e)
+		catch (Throwable e)  // ClassNotFoundException, NoClassDefFoundError
 		{
 			return false;
 		}
@@ -324,7 +324,7 @@ public abstract class LocationProvider
 		{
 			Class.forName("javax.bluetooth.LocalDevice");
 		}
-		catch (ClassNotFoundException e)
+		catch (Throwable e)  // ClassNotFoundException, NoClassDefFoundError
 		{
 			return false;
 		}

@@ -125,7 +125,7 @@ public class LogDemoScreen
 			Class.forName( name );
 			return true;
 		}
-		catch (ClassNotFoundException e)
+		catch (Throwable e)  // ClassNotFoundException, NoClassDefFoundError 
 		{
 			return false;
 		}
