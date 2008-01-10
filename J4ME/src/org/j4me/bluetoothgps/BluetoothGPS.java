@@ -40,8 +40,12 @@ class BluetoothGPS implements Runnable {
      * How long to wait before we just kill the read. We add the sleep value
      * since this sleep is performed before every read and we start the timer
      * before the pre-read sleep.
+     * <p>
+     * After experimenting with combinations of Bluetooth GPS devices and
+     * phones 3 seconds seems to work.  Motorola phones seem to be the only
+     * ones with Bluetooth implementations that need this.
      */
-    public static final short READ_TIMEOUT = SLEEP_BEFORE_READ + 1000;
+    public static final short READ_TIMEOUT = SLEEP_BEFORE_READ + 3000;
 
     /**
      * How long to wait to initialize the bluetooth connection
