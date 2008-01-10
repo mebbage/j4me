@@ -19,6 +19,10 @@ final class GPSRecord {
     public String quality;
     public String satelliteCount;
     public String vdop;
+    
+    /**
+     * The ground speed in knots.
+     */
     public String speed;
     public String course;
 

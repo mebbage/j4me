@@ -575,6 +575,7 @@ class NMEAParser {
                 break;
 
             case 7:
+            	// Speed is in knots.
                 speed = new String( data, offset, length );
 
                 break;

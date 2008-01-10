@@ -48,6 +48,11 @@ class BluetoothGPS implements Runnable {
      */
     public static final short BLUETOOTH_CONNECTION_INIT_SLEEP = 200;
     
+    /**
+     * Conversion constant to convert between knots and meters per second (m/s).
+     */
+    private static final float MS_PER_KNOT = 0.514444444444444f;
+    
 	/**
 	 * The number of days since January 1 for the start of a month.  This does not
 	 * include leap year days.
@@ -672,6 +677,7 @@ class BluetoothGPS implements Runnable {
 
                 // Convert the speed to float
                 float speed = Float.parseFloat(record.speed);
+                speed *= MS_PER_KNOT;  // Convert knots to meters/second
                 
                 // Convert the course to a float.
                 float course = (record.course == null ? Float.NaN : Float.parseFloat(record.course));	                	
