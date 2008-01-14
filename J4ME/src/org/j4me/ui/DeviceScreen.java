@@ -178,7 +178,7 @@ public abstract class DeviceScreen
 	 * The actual <code>Canvas</code> object that controls the device's screen.
 	 * This object wraps it.
 	 */
-	private CanvasWrapper slave;
+	private final CanvasWrapper slave;
 
 	/**
 	 * When <code>false</code> this class will paint the menu bar at the bottom
@@ -213,6 +213,17 @@ public abstract class DeviceScreen
 	{
 		// Create a wrapper around the canvas.
 		slave = new CanvasWrapper( this );
+	}
+	
+	/**
+	 * Returns the LCDUI <code>Canvas</code> wrapped by this screen.  This is
+	 * required for some APIs.
+	 * 
+	 * @return The <code>javax.microedition.lcdui.Canvas</code> wrapped by this screen.
+	 */
+	public Canvas getCanvas ()
+	{
+		return slave;
 	}
 	
 	/**
@@ -360,7 +371,7 @@ public abstract class DeviceScreen
 	{
 		if ( title == null )
 		{
-			return "";
+			return getClass().getName();
 		}
 		else
 		{
@@ -1701,14 +1712,7 @@ final class CanvasWrapper
 		{
 			// Unhandled exception in paint() will crash an application and not
 			// tell you why.  This lets the programmer know what caused the problem.
-			String name = master.getTitle();
-			
-			if ( name == null )
-			{
-				name = master.getClass().getName();
-			}
-			
-			Log.warn("Unhandled exception in paint for " + name, t);
+			Log.warn("Unhandled exception in paint for " + master, t);
 		}
 	}
 }

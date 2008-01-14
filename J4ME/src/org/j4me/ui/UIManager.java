@@ -28,7 +28,7 @@ public class UIManager
 	 * The exception message text displayed when the user tries to set
 	 * screens without first calling <code>init</code>.
 	 */
-	private static final String INIT_NOT_SET_EXCEPTION = "Must first call UIManager.init()";
+	private static final String INIT_NOT_SET_EXCEPTION = "Must first call UIManager.init";
 	
 	/**
 	 * The application's theme.
@@ -124,7 +124,7 @@ public class UIManager
 		
 		if ( screen == null )
 		{
-			throw new IllegalArgumentException( "Cannot set a null screen");
+			throw new IllegalArgumentException();
 		}
 		
 		synchronized ( display )
@@ -132,12 +132,28 @@ public class UIManager
 			// Deselect the current screen.
 			if ( current != null )
 			{
-				current.hideNotify(); 
+				try
+				{
+					current.hideNotify();
+				}
+				catch (Throwable t)
+				{
+					Log.warn("Unhandled exception in hideNotify() of " + current, t);
+				}
 			}
 	
 			// Select and set the new screen.
 			current = canvas;
-			canvas.showNotify();
+
+			try
+			{
+				canvas.showNotify();
+			}
+			catch (Throwable t)
+			{
+				Log.warn("Unhandled exception in showNotify() of " + current, t);
+			}
+			
 			display.setCurrent( screen );
 			
 			// Issue a repaint command to the screen.
@@ -148,14 +164,7 @@ public class UIManager
 			
 			if ( Log.isDebugEnabled() )
 			{
-				String name = canvas.getTitle();
-				
-				if ( name == null )
-				{
-					name = canvas.getClass().getName();
-				}
-				
-				Log.debug("Screen switched to " + name);
+				Log.debug("Screen switched to " + canvas);
 			}
 		}
 	}
