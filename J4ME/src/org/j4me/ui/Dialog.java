@@ -173,8 +173,8 @@ public abstract class Dialog
 	 */
 	public void delete (Component component)
 	{
-		clearLayout();
-		components.removeElement( component );
+		int index = components.indexOf( component );
+		delete( index );
 	}
 	
 	/**
@@ -192,6 +192,15 @@ public abstract class Dialog
 	{
 		clearLayout();
 		components.removeElementAt( index );
+		
+		if ( highlightedComponent == index )
+		{
+			highlightedComponent = -1;
+		}
+		else if ( highlightedComponent > index )
+		{
+			highlightedComponent--;
+		}
 	}
 	
 	/**
@@ -201,6 +210,7 @@ public abstract class Dialog
 	{
 		clearLayout();
 		components.removeAllElements();
+		highlightedComponent = -1;
 	}
 	
 	/**
@@ -610,8 +620,12 @@ public abstract class Dialog
 	 */
 	private synchronized void clearLayout ()
 	{
+		// Remove all component location calculations.
 		componentWidths = null;
 		absoluteHeights = null;
+		
+		// Reset the top of screen used for scrolling.
+		topOfScreen = 0;
 	}
 	
 	/**
