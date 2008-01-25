@@ -145,6 +145,24 @@ public class Log
 	}
 
 	/**
+	 * Log a message string with the <code>DEBUG</code> level including the
+	 * stack trace of the {@link Throwable} <code>t</code> passed as
+	 * parameter.
+	 * <p>
+	 * See {@link #debug(String)} for more detailed information.
+	 * 
+	 * @param message is the message to log.
+	 * @param t is the exception to log.
+	 */
+	public static void debug (String message, Throwable t)
+	{
+		if ( level.levelInt <= Level.DEBUG.levelInt )
+		{
+			addLogMessage( message, Level.DEBUG, t );
+		}
+	}
+
+	/**
 	 * Log a message string with the {@link Level#INFO INFO} Level.
 	 * <p>
 	 * This method first checks if this category is <code>INFO</code> enabled
@@ -159,6 +177,24 @@ public class Log
 		if ( level.levelInt <= Level.INFO.levelInt )
 		{
 			addLogMessage( message, Level.INFO, null );
+		}
+	}
+
+	/**
+	 * Log a message string with the <code>INFO</code> level including the
+	 * stack trace of the {@link Throwable} <code>t</code> passed as
+	 * parameter.
+	 * <p>
+	 * See {@link #info(String)} for more detailed information.
+	 * 
+	 * @param message is the message to log.
+	 * @param t is the exception to log.
+	 */
+	public static void info (String message, Throwable t)
+	{
+		if ( level.levelInt <= Level.INFO.levelInt )
+		{
+			addLogMessage( message, Level.INFO, t );
 		}
 	}
 
