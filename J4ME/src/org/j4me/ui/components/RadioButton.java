@@ -30,12 +30,12 @@ public class RadioButton
 	/**
 	 * The ordered list of radio button choices.
 	 */
-	private Vector choices = new Vector();
+	protected Vector choices = new Vector();
 	
 	/**
 	 * The index of the currently selected choice.
 	 */
-	private int selected;
+	protected int selected;
 	
 	/**
 	 * This component appears as a <code>TextBox</code>.  Only editing is done
