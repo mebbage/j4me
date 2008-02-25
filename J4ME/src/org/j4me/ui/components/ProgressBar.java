@@ -30,13 +30,13 @@ public class ProgressBar
 	/**
 	 * The percentage of the screen's width that a progress bar is.
 	 */
-	private static final double SCALE_WIDTH = 1.00;  // 100%
+	private double widthPercentage = 0.90;  // 90%
 	
 	/**
 	 * The number of times the default font height that the progress bar
 	 * should be. 
 	 */
-	private static final double SCALE_HEIGHT = 2.0;
+	private double heightPercentage = 1.2;  // 120%
 	
 	/**
 	 * The label that appears right above the progress bar.  For example it might
@@ -80,6 +80,7 @@ public class ProgressBar
 	 */
 	public ProgressBar ()
 	{
+		setHorizontalAlignment( Graphics.HCENTER );
 	}
 	
 	/**
@@ -188,6 +189,64 @@ public class ProgressBar
 	}
 
 	/**
+	 * Sets how far across the screen the progress bar extends.  This has
+	 * no effect on the size of a spinner.
+	 * 
+	 * @param percentageOfScreen is the length of the progress bar relative
+	 *  to the width of the screen.  It must be between 0.00 and 1.00.
+	 */
+	public void setWidthOfScreen (double percentageOfScreen)
+	{
+		if ( (percentageOfScreen < 0.0) || (percentageOfScreen > 1.0) )
+		{
+			// The percentage must be between 0.00 and 1.00.
+			throw new IllegalArgumentException( String.valueOf(percentageOfScreen) );
+		}
+		
+		this.widthPercentage = percentageOfScreen;
+	}
+	
+	/**
+	 * Gets how far across the screen the progress bar extends.
+	 * 
+	 * @return The length of the progress bar relative to the width of
+	 *  the screen.
+	 */
+	public double getWidthOfScreen ()
+	{
+		return widthPercentage;
+	}
+	
+	/**
+	 * Sets the height of the progress bar relative to the default font
+	 * specified in the theme.  It has no effect on the size of a spinner.
+	 * 
+	 * @param percentageOfFontHeight is how tall, relative to the default font,
+	 *  the progress bar is.  For example 1.2 is 120% the size.
+	 */
+	public void setRelativeHeight (double percentageOfFontHeight)
+	{
+		if ( percentageOfFontHeight < 0 )
+		{
+			throw new IllegalArgumentException( String.valueOf(percentageOfFontHeight) );
+		}
+		
+		this.heightPercentage = percentageOfFontHeight;
+	}
+	
+	/**
+	 * Returns the height of the progress bar relative to the height of
+	 * the default font specified in the theme.
+	 * 
+	 * @return The height of the progress bar as a percentage of the
+	 *  default font's height.  For example 1.2 is 120% the size.
+	 */
+	public double getRelativeHeight ()
+	{
+		return heightPercentage;
+	}
+	
+	/**
 	 * Paints the progress bar. 
 	 * 
 	 * @param g is the <code>Graphics</code> object to be used for rendering the item.
@@ -246,6 +305,22 @@ public class ProgressBar
 	 */
 	protected void paintBar (Graphics g, Theme theme, int x, int y, int width, int height, boolean selected)
 	{
+		// Get the location of the progress bar.
+		int barWidth = (int)( width * widthPercentage );
+		
+		int horizontalAlignment = getHorizontalAlignment();
+		
+		if ( horizontalAlignment == Graphics.HCENTER )
+		{
+			x += (width - barWidth) / 2; 
+		}
+		else if ( horizontalAlignment == Graphics.RIGHT )
+		{
+			x += (width - barWidth); 
+		}
+		
+		width = barWidth;
+		
 		// Calculate the completed progress.
 		double percentageCompleted = (double)value / (double)max;
 		int completedWidth = (int)MathFunc.round( width * percentageCompleted );
@@ -359,10 +434,10 @@ public class ProgressBar
 	 */
 	protected int[] getPreferredComponentSize (Theme theme, int viewportWidth, int viewportHeight)
 	{
-		int width = (int)( viewportWidth * SCALE_WIDTH );
+		int width = (int)( viewportWidth * widthPercentage );
 		
 		int fontHeight = theme.getFont().getHeight();
-		int height = (int)( fontHeight * SCALE_HEIGHT );
+		int height = (int)( fontHeight * heightPercentage );
 		
 		if ( max == 0 )
 		{

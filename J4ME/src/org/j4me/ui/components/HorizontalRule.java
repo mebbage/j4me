@@ -11,9 +11,9 @@ public class HorizontalRule
 	extends Component
 {
 	/**
-	 * The height of the line.
+	 * The height of the line in pixels.
 	 */
-	private static final int HEIGHT = 1;
+	private int height = 1;  // 1 pixel
 	
 	/**
 	 * The percentage of the screen's width the horizontal rule
@@ -59,6 +59,33 @@ public class HorizontalRule
 	}
 	
 	/**
+	 * Sets the height of the horizontal line rule in pixels.
+	 * 
+	 * @param pixels is how many pixels high the horizontal line will be.
+	 *  It must be at least 1.
+	 */
+	public void setHeight (int pixels)
+	{
+		if ( pixels < 1 )
+		{
+			throw new IllegalArgumentException( String.valueOf(pixels) );
+		}
+		
+		this.height = pixels;
+	}
+	
+	/**
+	 * Returns how many pixels high the horizontal rule is.  The default
+	 * is 1.
+	 * 
+	 * @return The number of pixels high the horizontal rule is.
+	 */
+	public int getHeight ()
+	{
+		return height;
+	}
+	
+	/**
 	 * Paints the horizontal rule.
 	 * 
 	 * @see org.j4me.ui.components.Component#paintComponent(javax.microedition.lcdui.Graphics, org.j4me.ui.Theme, int, int, boolean)
@@ -86,7 +113,7 @@ public class HorizontalRule
 		g.setColor( color );
 		
 		// Draw the line.
-		g.drawLine( lineX, 0, lineX + lineWidth, 0 );
+		g.drawLine( lineX, 0, lineX + lineWidth, height - 1 );
 	}
 
 	/**
@@ -96,6 +123,6 @@ public class HorizontalRule
 	 */
 	protected int[] getPreferredComponentSize (Theme theme, int viewportWidth, int viewportHeight)
 	{
-		return new int[] { viewportWidth, HEIGHT };
+		return new int[] { viewportWidth, height };
 	}
 }
