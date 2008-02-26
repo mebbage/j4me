@@ -291,6 +291,11 @@ public class Label
 			int fontHeight = font.getHeight();
 			int paragraphSpacing = fontHeight / 2;
 			
+			// The width of a wide character used as a safety
+			// margin in calculating the line width.  See breakIntoLines()
+			// for more information.
+			int safetyMargin = font.charWidth( 'O' );
+
 			for ( int i = 0; i < lines.length; i++ )
 			{
 				if ( lines[i] == null )
@@ -300,7 +305,7 @@ public class Label
 				}
 				else
 				{
-					int lineWidth = font.stringWidth( lines[i] );
+					int lineWidth = font.stringWidth( lines[i] ) + safetyMargin;
 					
 					if ( lineWidth > width )
 					{
