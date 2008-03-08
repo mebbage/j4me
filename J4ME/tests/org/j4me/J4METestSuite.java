@@ -3,6 +3,7 @@ package org.j4me;
 import org.j4me.bluetoothgps.*;
 import org.j4me.collections.*;
 import org.j4me.logging.*;
+import org.j4me.ui.DialogTest;
 import org.j4me.ui.components.*;
 import org.j4me.util.*;
 import j2meunit.framework.*;
@@ -37,6 +38,8 @@ public class J4METestSuite
 		suite.addTest(new BluetoothLocationProviderTest().suite());
 		
 		// Add all the UI tests.
+		suite.addTest(new DialogTest().suite());
+		
 		suite.addTest(new LabelTest().suite());
 
 		return suite;

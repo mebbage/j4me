@@ -48,6 +48,9 @@ public class UIDemoMidlet
 		ScrollbarExample scrollbarExample = new ScrollbarExample( componentExampleMenu );
 		componentExampleMenu.appendMenuOption( scrollbarExample );
 		
+		PictureExample pictureExample = new PictureExample( componentExampleMenu );
+		componentExampleMenu.appendMenuOption( pictureExample );
+		
 		// Create a submenu showing different example themes.
 		Menu themesMenu = new Menu( "Themes", menu );
 		menu.appendSubmenu( themesMenu );

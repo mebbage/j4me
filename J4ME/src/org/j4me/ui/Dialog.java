@@ -699,6 +699,19 @@ public abstract class Dialog
 	 */
 	private void scroll (boolean down)
 	{
+		// Safety checks.
+		if ( absoluteHeights == null )
+		{
+			// Calculated the layout.
+			hasVerticalScrollbar();
+		}
+		
+		if ( absoluteHeights.length == 0 )
+		{
+			// Can't scroll with no components.
+			return;
+		}
+		
 		// Get the dimensions of the form.
 		int topOfForm = 0;
 		int screenHeight = getHeight();
@@ -910,7 +923,6 @@ public abstract class Dialog
 		// Continue processing the event.
 		super.keyReleased( keyCode );
 	}
-
 
 	/**
 	 * Called when the pointer is pressed.
