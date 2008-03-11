@@ -34,9 +34,10 @@ public class ProgressBar
 	
 	/**
 	 * The number of times the default font height that the progress bar
-	 * should be. 
+	 * should be.  Progress bars default to 1.2 (120%) and spinners to
+	 * 2.0 (200%).
 	 */
-	private double heightPercentage = 1.2;  // 120%
+	private double heightPercentage = 0;
 	
 	/**
 	 * The label that appears right above the progress bar.  For example it might
@@ -195,7 +196,7 @@ public class ProgressBar
 	 * @param percentageOfScreen is the length of the progress bar relative
 	 *  to the width of the screen.  It must be between 0.00 and 1.00.
 	 */
-	public void setWidthOfScreen (double percentageOfScreen)
+	public void setRelativeWidth (double percentageOfScreen)
 	{
 		if ( (percentageOfScreen < 0.0) || (percentageOfScreen > 1.0) )
 		{
@@ -212,14 +213,14 @@ public class ProgressBar
 	 * @return The length of the progress bar relative to the width of
 	 *  the screen.
 	 */
-	public double getWidthOfScreen ()
+	public double getRelativeWidth ()
 	{
 		return widthPercentage;
 	}
 	
 	/**
 	 * Sets the height of the progress bar relative to the default font
-	 * specified in the theme.  It has no effect on the size of a spinner.
+	 * specified in the theme.  Setting to 0 uses the default heights.
 	 * 
 	 * @param percentageOfFontHeight is how tall, relative to the default font,
 	 *  the progress bar is.  For example 1.2 is 120% the size.
@@ -243,7 +244,22 @@ public class ProgressBar
 	 */
 	public double getRelativeHeight ()
 	{
-		return heightPercentage;
+		if ( heightPercentage == 0 )
+		{
+			// Default heights.
+			if ( max == 0 )  // spinner
+			{
+				return 2.0;
+			}
+			else  // progress bar
+			{
+				return 1.2;
+			}
+		}
+		else  // user specified height
+		{
+			return heightPercentage;
+		}
 	}
 	
 	/**
@@ -306,7 +322,7 @@ public class ProgressBar
 	protected void paintBar (Graphics g, Theme theme, int x, int y, int width, int height, boolean selected)
 	{
 		// Get the location of the progress bar.
-		int barWidth = (int)( width * widthPercentage );
+		int barWidth = (int)( width * getRelativeWidth() );
 		
 		int horizontalAlignment = getHorizontalAlignment();
 		
@@ -434,10 +450,10 @@ public class ProgressBar
 	 */
 	protected int[] getPreferredComponentSize (Theme theme, int viewportWidth, int viewportHeight)
 	{
-		int width = (int)( viewportWidth * widthPercentage );
+		int width = (int)( viewportWidth * getRelativeWidth() );
 		
 		int fontHeight = theme.getFont().getHeight();
-		int height = (int)( fontHeight * heightPercentage );
+		int height = (int)( fontHeight * getRelativeHeight() );
 		
 		if ( max == 0 )
 		{
