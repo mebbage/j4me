@@ -39,17 +39,18 @@ public class DialogTest
 	 */
 	public void testComponentTallerThanScreen ()
 	{
-		// Create a dialog with a component taller than the screen height.
+		// Create a dialog and try scrolling down.
 		Dialog d = new TestDialog();
+		d.keyPressed( Dialog.DOWN );
+		
+		// Now make a dialog with a component taller than the screen.
 		int screenHeight = d.getScreenHeight();
 		Whitespace whitespace = new Whitespace( screenHeight * 2 );
 		d.append( whitespace );
 		
-		// Simulate the dialog rendering itself.
 		boolean scrollbar = d.hasVerticalScrollbar();
 		assertTrue("Component bigger than the screen should force a scrollbar", scrollbar);
 		
-		// Simulate a scroll event (where the bug was).
 		d.keyPressed( Dialog.DOWN );
 	}
 }

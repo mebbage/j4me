@@ -706,7 +706,7 @@ public abstract class Dialog
 			hasVerticalScrollbar();
 		}
 		
-		if ( absoluteHeights.length == 0 )
+		if ( components.size() == 0 )
 		{
 			// Can't scroll with no components.
 			return;
