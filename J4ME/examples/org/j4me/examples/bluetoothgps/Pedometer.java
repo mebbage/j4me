@@ -306,7 +306,6 @@ public class Pedometer
 			time.setLabel( t );
 			
 			// Update this screen.
-			invalidate();
 			repaint();
 		}
 	}
