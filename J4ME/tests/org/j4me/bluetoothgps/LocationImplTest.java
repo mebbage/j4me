@@ -28,7 +28,7 @@ public class LocationImplTest
 		suite.addTest(new LocationImplTest("testInvalid", new TestMethod() 
 				{ public void run(TestCase tc) {((LocationImplTest) tc).testInvalid(); } }));
 		suite.addTest(new LocationImplTest("testValid", new TestMethod() 
-		{ public void run(TestCase tc) {((LocationImplTest) tc).testValid(); } }));
+				{ public void run(TestCase tc) {((LocationImplTest) tc).testValid(); } }));
 
 		return suite;
 	}

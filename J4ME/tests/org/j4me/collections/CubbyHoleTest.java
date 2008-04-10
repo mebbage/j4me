@@ -30,7 +30,7 @@ public class CubbyHoleTest
 		suite.addTest(new CubbyHoleTest("testBasics", new TestMethod() 
 				{ public void run(TestCase tc) {((CubbyHoleTest) tc).testBasics(); } }));
 		suite.addTest(new CubbyHoleTest("testBlocking", new TestMethod() 
-		{ public void run(TestCase tc) {((CubbyHoleTest) tc).testBlocking(); } }));
+				{ public void run(TestCase tc) {((CubbyHoleTest) tc).testBlocking(); } }));
 		
 		return suite;
 	}
