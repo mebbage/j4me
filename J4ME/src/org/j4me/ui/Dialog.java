@@ -29,6 +29,9 @@ public abstract class Dialog
 	/**
 	 * The index of <code>component</code> the user currently has highlighted.
 	 * If this is not an index of <code>component</code> nothing is highlighted.
+	 * Any component can be highlighted; it does not have to accept user input
+	 * (<code>Component.acceptsInput()</code>).  It is up the component itself
+	 * to decide if it should be painted differently when highlighted.
 	 */
 	private int highlightedComponent = -1;
 	
@@ -615,6 +618,21 @@ public abstract class Dialog
 	}
 	
 	/**
+	 * Forces the layout of all components to be recalculated.  This should
+	 * be called whenever this screen or its components are altered.  For
+	 * example changing a label may change its size and this method will
+	 * account for that.
+	 */
+	public void invalidate ()
+	{
+		// Remove the layout of all components.
+		clearLayout();
+		
+		// Recalculate the position of all components.
+		hasVerticalScrollbar();
+	}
+	
+	/**
 	 * Whenever the form is altered this method should be called to clear
 	 * the layout.  The layout will be re-established during the next painting.
 	 */
@@ -657,15 +675,12 @@ public abstract class Dialog
 			
 			componentWidths[i] = dimensions[0];
 			componentY += dimensions[1] + spacing;
-			
-			// Is this the first component that can be highlighted?
-			if ( highlightedComponent < 0 )
-			{
-				if ( c.acceptsInput() )
-				{
-					highlightedComponent = i;
-				}
-			}
+		}
+		
+		// Set the first component that can be highlighted.
+		if ( highlightedComponent < 0 )
+		{
+			highlightedComponent = 0;
 		}
 		
 		// Add a dummy last element to record the bottom of all components.
@@ -673,18 +688,126 @@ public abstract class Dialog
 	}
 
 	/**
-	 * Forces the layout of all components to be recalculated.  This should
-	 * be called whenever this screen or its components are altered.  For
-	 * example changing a label may change its size and this method will
-	 * account for that.
+	 * Returns the next component that <code>highlightedComponent</code>
+	 * should be set to.  The way it is selected is:
+	 * <ol>
+	 *  <li>If two adjacent components accept user input, then that next 
+	 *      component would be returned.
+	 *  <li>If two components that accept user input are separated by ones
+	 *      that do not, then we'd still skip to that next one that does.
+	 *  <li>The exception is when there are enough components that accept
+	 *      user input between the two that more than a screen's height
+	 *      is between them.  In that case we need to set one of the
+	 *      intermediate components so the screen does not scroll too far.
+	 * </ol>
+	 * 
+	 * @param down when <code>true</code> means the next component with a
+	 *  higher index; when <code>false</code> means the next with a lower.
+	 * @param maxScroll is the maximum number of pixels that can be scrolled
+	 *  to get to the next component.  For example it may be 90% the height
+	 *  of the screen.
+	 * @return The index of the next component to highlight.
 	 */
-	public void invalidate ()
+	private int nextHighlightableComponent (boolean down, int maxScroll)
 	{
-		// Remove the layout of all components.
-		clearLayout();
-		
-		// Recalculate the position of all components.
-		hasVerticalScrollbar();
+		if ( down )
+		{
+			// How far down can the component be?
+			int maxBottom;
+			
+			if ( highlightedComponent < 0 )
+			{
+				maxBottom = topOfScreen;
+			}
+			else
+			{
+				maxBottom = topOfScreen + getHeight();
+			}
+
+			maxBottom += maxScroll;
+			
+			// Walk through the components until we find the next one to highlight.
+			int components = size();
+			
+			for ( int next = highlightedComponent + 1; next < components; next++ )
+			{
+				// Otherwise have we walked off the end of the screen?
+				int nextBottom = absoluteHeights[next + 1];
+				
+				if ( nextBottom > maxBottom )
+				{
+					if ( next - 1 == highlightedComponent )
+					{
+						// Move at least to the next component, even if it cannot
+						// be completely shown because it is bigger than the screen.
+						return next;
+					}
+					else
+					{
+						// Show the one before next so it can be completely
+						// shown on the screen.
+						return next - 1;
+					}
+				}
+				else
+				{
+					// If this component accepts input stop on it.
+					Component c = get( next );
+					
+					if ( c.acceptsInput() )
+					{
+						return next;
+					}
+				}
+			}
+			
+			// If we made it here highlight the last component.
+			return components - 1;
+		}
+		else  // up
+		{
+			if ( highlightedComponent > 0 )
+			{
+				// How far up can the component be?
+				int maxTop = topOfScreen - maxScroll;
+
+				// Walk through the components until we find the next one to highlight.
+				for ( int next = highlightedComponent - 1; next >= 0; next-- )
+				{
+					// Otherwise have we walked off the end of the screen?
+					int nextTop = absoluteHeights[next];
+					
+					if ( nextTop < maxTop )
+					{
+						if ( next + 1 == highlightedComponent )
+						{
+							// Move at least to the next component, even if it cannot
+							// be shown because it is bigger than the screen.
+							return next;
+						}
+						else
+						{
+							// Show the one before next so it can be completely
+							// shown on the screen.
+							return next + 1;
+						}
+					}
+					else
+					{
+						// If this component accepts input stop on it.
+						Component c = get( next );
+						
+						if ( c.acceptsInput() )
+						{
+							return next;
+						}
+					}
+				}
+			}
+			
+			// If we made it here highlight the first component.
+			return 0;
+		}
 	}
 	
 	/**
@@ -717,116 +840,93 @@ public abstract class Dialog
 		int screenHeight = getHeight();
 		int bottomOfForm = absoluteHeights[absoluteHeights.length - 1] - screenHeight;
 		int bottomOfScreen = topOfScreen + screenHeight;
+		
+		// We scroll 90% of the screen unless there is another highlightable
+		// component within that 90%.  In which case we scroll only to the
+		// highlightable component, not the full 90%.
+		int max = screenHeight * 9 / 10;
 
-		// Get the dimensions of the current highlighted component.
-		int current = (highlightedComponent >= 0 ? highlightedComponent : 0); 
-		int currentTop = absoluteHeights[current];
-		int currentBottom = absoluteHeights[current + 1];
-		
 		// Get the next component that can be highlighted.
-		int nextHighlighted = highlightedComponent;
-		
-		if ( down )
-		{
-			int max = size();
-			
-			for ( int i = highlightedComponent + 1; i < max; i++ )
-			{
-				Component c = get( i );
-				
-				if ( c.acceptsInput() )
-				{
-					nextHighlighted = i;
-					break;
-				}
-			}
-		}
-		else  // up
-		{
-			for ( int i = highlightedComponent - 1; i >= 0; i-- )
-			{
-				Component c = get( i );
-				
-				if ( c.acceptsInput() )
-				{
-					nextHighlighted = i;
-					break;
-				}
-			}
-		}
-		
+		int current = highlightedComponent;
+		highlightedComponent = nextHighlightableComponent( down, max );
+
 		// Scroll.
 		if ( hasVerticalScrollbar() )
 		{
 			// Calculate the number of pixels to scroll the form.
-			//   We scroll 90% of the screen unless there is another highlightable
-			//   component within that 90%.  In which case we scroll only to the
-			//   highlightable component, not the full 90%.
-			int max = screenHeight * 9 / 10;  // 90% of the screen.
 			int scroll;
-			
-			// What is the position of the next highlightable component?
-			if ( (nextHighlighted < 0) || (nextHighlighted == highlightedComponent) )
-			{
-				// There are no highlightable components.  Always scroll the
-				// maximum.
-				scroll = max;
-			}
-			else
-			{
-				// Get the screen position of the next highlightable component.
-				int nextTop = absoluteHeights[nextHighlighted];
-				int nextBottom = absoluteHeights[nextHighlighted + 1];
 
-				// Calculate how far to scroll to get to the next highlighted component.
-				if ( down )
+			// Calculate how far to scroll to get to the next highlighted component.
+			if ( down )
+			{
+				int currentBottom = absoluteHeights[current + 1];
+				
+				if ( currentBottom > bottomOfScreen )
 				{
-					if ( currentTop < topOfScreen )
-					{
-						currentTop = topOfScreen;
-					}
+					// The current component actually is clipped by the bottom of
+					// the screen (because it is too big to show all at once).
+					// Just scroll down we can see more of it.
+					scroll = max;
+				}
+				else
+				{
+					// Get the screen position of the next highlightable component.
+					int nextTop = absoluteHeights[highlightedComponent];
+					int nextBottom = absoluteHeights[highlightedComponent + 1];
 					
-					scroll = nextTop - currentTop;
-					
-					// Don't scroll if the next highlighted component fits
-					// completely on the screen already.
-					if ( nextBottom < bottomOfScreen )
+					if ( (nextTop > topOfScreen) && (nextBottom < bottomOfScreen) )
 					{
+						// Don't scroll if the next highlighted component fits
+						// completely on the screen already.
 						scroll = 0;
+					}
+					else
+					{
+						scroll = nextBottom - currentBottom;
 					}
 				}
-				else  // up
+			}
+			else  // up
+			{
+				int currentTop = absoluteHeights[current];
+				
+				if ( currentTop < topOfScreen )
 				{
-					if ( currentBottom > bottomOfScreen )
+					// The current component actually is clipped by the top of
+					// the screen (because it is too big to show all at once).
+					// Just scroll up we can see more of it.
+					scroll = max;
+				}
+				else
+				{
+					if ( highlightedComponent == 0 )
 					{
-						currentBottom = bottomOfScreen;
+						// Scroll to the very top of the dialog.
+						scroll = topOfScreen;
 					}
-					
-					scroll = currentBottom - nextBottom;
-					
-					// Don't scroll if the next highlighted component fits
-					// completely on the screen already.
-					if ( nextTop >= topOfScreen )
+					else
 					{
-						scroll = 0;
+						// Get the bottom of the component above the next highlighted one.
+						int previousBottom = absoluteHeights[highlightedComponent] - spacing;
+						
+						scroll = topOfScreen - previousBottom;
+						
+						// Don't scroll if the next highlighted component fits
+						// completely on the screen already.
+						if ( previousBottom >= topOfScreen )
+						{
+							scroll = 0;
+						}
 					}
 				}
 			}
 			
+			// Set the position of the form.
 			if ( scroll > max )
 			{
-				// The next highlightable component is too far down to scroll
-				// to immediately.  Instead scroll the form part way.  The user
-				// will click to scroll again if they want.
 				scroll = max;
 			}
-			else
-			{
-				// Scroll to and highlight the next highlightable component.
-				highlightedComponent = nextHighlighted;
-			}
 	
-			// Set the position of the form.
 			if ( down == false )
 			{
 				// If scrolling up, set the scroll to a negative number.
@@ -843,11 +943,6 @@ public abstract class Dialog
 			{
 				topOfScreen = bottomOfForm;
 			}
-		}
-		else  // no scrollbar
-		{
-			// Change the highlighted component.
-			highlightedComponent = nextHighlighted;
 		}
 		
 		// Redraw the screen at the scrolled position.
