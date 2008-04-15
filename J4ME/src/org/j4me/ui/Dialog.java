@@ -625,11 +625,27 @@ public abstract class Dialog
 	 */
 	public void invalidate ()
 	{
+		// Record the current screen position.
+		int component = 0, delta = 0;
+		
+		if ( absoluteHeights != null )
+		{
+			component = highlightedComponent >= 0 ? highlightedComponent : 0;
+			delta = absoluteHeights[component] - topOfScreen;
+		}
+		
 		// Remove the layout of all components.
 		clearLayout();
 		
 		// Recalculate the position of all components.
 		hasVerticalScrollbar();
+		
+		// Reposition the screen to its original position.
+		if ( component != 0 )
+		{
+			highlightedComponent = component;
+			topOfScreen = absoluteHeights[component] - delta;
+		}
 	}
 	
 	/**
