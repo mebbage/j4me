@@ -453,16 +453,19 @@ public abstract class Component
 	 */
 	protected static int paintRect (Graphics g, Theme theme, int x, int y, int width, int height, boolean selected)
 	{
-		// Paint the border.
-		int rounding = height / 4;
+		// Calculate how much to round the edges.  This makes the component
+		// look better.  However, we don't want to make this so big it makes
+		// the component's border crazily thick.
+		int rounding = Math.min( height / 4, 5 );
 		
+		// Paint the border.
 		if ( selected )
 		{
 			// Draw a thick, highlighted border.
 			int border = theme.getHighlightColor();
 			g.setColor( border );
 			
-			g.fillRoundRect( 0, y, width, height, rounding, rounding );
+			g.drawRoundRect( 0, y, width - 1, height - 1, rounding, rounding );
 		}
 
 		// Draw a normal border.
@@ -477,20 +480,10 @@ public abstract class Component
 		int bw = width - bs;
 		int bh = height - bs;
 		
-		g.fillRect( bx, by, bw, bh );
-		
-		// Subtract out a rectangle from the middle.
-		int interior = theme.getBackgroundColor();
-		g.setColor( interior );
-		
-		int offset = Math.max( HIGHLIGHTED_BORDER_WIDTH, rounding / 2 );
-		int rx = offset;
-		int ry = y + offset;
-		int rw = width - 2 * offset;
-		int rh = height - 2 * offset;
-		g.fillRect( rx, ry, rw, rh );
+		g.drawRect( bx, by, bw - 1, bh - 1 );
 		
 		// Return the offset from the edges of the component to the inside.
+		int offset = Math.max( HIGHLIGHTED_BORDER_WIDTH, rounding / 2 );
 		return offset;
 	}
 }
