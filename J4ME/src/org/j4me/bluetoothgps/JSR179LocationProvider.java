@@ -493,16 +493,19 @@ class JSR179LocationProvider
 	 */
 	protected static org.j4me.bluetoothgps.Location convertLocation (javax.microedition.location.Location jsr179)
 	{
-		LocationImpl j4me;
+		LocationImpl j4me = null;
 		
-		if ( jsr179.isValid() )
+		if ( jsr179 != null )
 		{
-			org.j4me.bluetoothgps.QualifiedCoordinates j4meCoordinates = convertQualifiedCoordinates( jsr179.getQualifiedCoordinates() );
-			j4me = new LocationImpl( j4meCoordinates, jsr179.getSpeed(), jsr179.getCourse(), jsr179.getTimestamp() );
-		}
-		else
-		{
-			j4me = new LocationImpl();
+			if ( jsr179.isValid() )
+			{
+				org.j4me.bluetoothgps.QualifiedCoordinates j4meCoordinates = convertQualifiedCoordinates( jsr179.getQualifiedCoordinates() );
+				j4me = new LocationImpl( j4meCoordinates, jsr179.getSpeed(), jsr179.getCourse(), jsr179.getTimestamp() );
+			}
+			else
+			{
+				j4me = new LocationImpl();
+			}
 		}
 		
 		return j4me;
