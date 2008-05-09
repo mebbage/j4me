@@ -204,16 +204,20 @@ public abstract class Dialog
 	 */
 	public void delete (int index)
 	{
-		invalidate();
-		components.removeElementAt( index );
-		
-		if ( highlightedComponent == index )
+		if ( index >= 0 )
 		{
-			highlightedComponent = -1;
-		}
-		else if ( highlightedComponent > index )
-		{
-			highlightedComponent--;
+			components.removeElementAt( index );
+			
+			if ( highlightedComponent == index )
+			{
+				highlightedComponent = -1;
+			}
+			else if ( highlightedComponent > index )
+			{
+				highlightedComponent--;
+			}
+			
+			invalidate();
 		}
 	}
 	
@@ -222,9 +226,9 @@ public abstract class Dialog
 	 */
 	public void deleteAll ()
 	{
-		invalidate();
 		components.removeAllElements();
 		highlightedComponent = -1;
+		invalidate();
 	}
 	
 	/**
@@ -234,7 +238,6 @@ public abstract class Dialog
 	 */
 	public Enumeration components ()
 	{
-		invalidate();
 		return components.elements();
 	}
 	
