@@ -35,6 +35,12 @@ public abstract class Component
 	private DeviceScreen screen;
 	
 	/**
+	 * A component this one is embedded within.  Typically components are not
+	 * embedded within each other so this will be <code>null</code>.
+	 */
+	protected Component container;
+	
+	/**
 	 * The left corner pixel of this component.  This value is specified by the
 	 * last call to <code>paint</code>.
 	 */
@@ -287,7 +293,7 @@ public abstract class Component
 	 * @param visible when <code>true</code> indicates the component is painted (or
 	 *  about to be) on the screen.
 	 */
-	public void show (boolean visible)
+	public void visible (boolean visible)
 	{
 		if ( this.visible != visible )
 		{
@@ -338,13 +344,49 @@ public abstract class Component
 	}
 	
 	/**
+	 * Signals that the Component's size needs to be updated.  This method
+	 * is intended to be called by subclassed components to force layout
+	 * of the component to change.  A call to this method will return immediately,
+	 * and it will cause the container's layout algorithm to run at some point
+	 * in the future.
+	 * 
+	 * @see Dialog#invalidate()
+	 */
+	protected void invalidate ()
+	{
+		// Invalidate the whole dialog and have it reposition all components.
+		if ( screen != null )
+		{
+			if ( screen instanceof Dialog )
+			{
+				Dialog d = (Dialog)screen;
+				d.invalidate();
+			}
+		}
+		
+		// Erase any knowledge this component has of its position.
+		x = y = width = height = 0;
+	}
+	
+	/**
 	 * Forces this component to repaint itself.
 	 */
 	public void repaint ()
 	{
 		if ( isShown() && (screen != null) )
 		{
-			screen.repaint( x, y, width, height );
+			if ( height != 0 )
+			{
+				// Repaint just the component area since we know it.
+				screen.repaint( x, y, width, height );
+			}
+			else
+			{
+				// Repaint the entire screen since we aren't sure where
+				// the component is on it.  An invalidate() was likely
+				// just called so the component may move anyway.
+				screen.repaint();
+			}
 		}
 	}
 

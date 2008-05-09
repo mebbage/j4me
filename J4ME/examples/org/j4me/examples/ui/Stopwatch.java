@@ -173,7 +173,7 @@ public class Stopwatch
 	public void showNotify ()
 	{
 		// Inform the components they are visible.
-		elapsedTime.show( true );
+		elapsedTime.visible( true );
 	}
 
 	/**
@@ -186,7 +186,7 @@ public class Stopwatch
 	public void hideNotify ()
 	{
 		// Inform the components they are no longer visible.
-		elapsedTime.show( false );
+		elapsedTime.visible( false );
 		
 		// Stop the timer.
 		if ( timer != null )

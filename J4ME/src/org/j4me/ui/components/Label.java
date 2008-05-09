@@ -79,6 +79,15 @@ public class Label
 	}
 
 	/**
+	 * @see Component#invalidate()
+	 */
+	protected void invalidate ()
+	{
+		lines = null;
+		super.invalidate();
+	}
+	
+	/**
 	 * @return The text this label will display.
 	 */
 	public String getLabel ()
@@ -93,7 +102,7 @@ public class Label
 	public synchronized void setLabel (String text)
 	{
 		this.text = text;
-		this.lines = null;
+		invalidate();
 	}
 	
 	/**
@@ -136,7 +145,7 @@ public class Label
 	public synchronized void setFont (Font font)
 	{
 		this.font = font;
-		this.lines = null;
+		invalidate();
 	}
 	
 	/**

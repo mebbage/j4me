@@ -42,6 +42,8 @@ public class Whitespace
 		}
 		
 		this.vertical = vertical;
+		
+		invalidate();
 	}
 	
 	/**

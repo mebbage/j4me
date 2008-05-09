@@ -62,6 +62,9 @@ public class CheckBox
 	public void setLabel (String value)
 	{
 		label.setLabel( value );
+		
+		// The label may change the size requirements of this component.
+		invalidate();
 	}
 	
 	/**
@@ -93,7 +96,7 @@ public class CheckBox
 	 */
 	protected void showNotify ()
 	{
-		label.show( true );
+		label.visible( true );
 		super.showNotify();
 	}
 
@@ -102,7 +105,7 @@ public class CheckBox
 	 */
 	protected void hideNotify ()
 	{
-		label.show( false );
+		label.visible( false );
 		super.hideNotify();
 	}
 

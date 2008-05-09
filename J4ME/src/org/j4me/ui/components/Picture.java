@@ -40,6 +40,7 @@ public class Picture
 	public void setImage (Image image)
 	{
 		this.image = image;
+		invalidate();
 	}
 	
 	/**
@@ -54,6 +55,7 @@ public class Picture
 		throws IOException
 	{
 		this.image = Image.createImage( location );
+		invalidate();
 	}
 	
 	/**

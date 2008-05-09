@@ -72,6 +72,9 @@ public class HorizontalRule
 		}
 		
 		this.height = pixels;
+		
+		// The height may change the size requirements of this component.
+		invalidate();
 	}
 	
 	/**

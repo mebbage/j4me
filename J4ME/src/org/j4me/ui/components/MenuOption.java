@@ -162,6 +162,7 @@ public class MenuOption
 	public void setLabel (String label)
 	{
 		screenText = label;
+		invalidate();
 	}
 	
 	/**
@@ -219,7 +220,7 @@ public class MenuOption
 	protected void showNotify ()
 	{
 		// Pass the event to contained components.
-		text.show( true );
+		text.visible( true );
 		
 		// Continue processing the event.
 		super.showNotify();
@@ -231,7 +232,7 @@ public class MenuOption
 	protected void hideNotify ()
 	{
 		// Pass the event to contained components.
-		text.show( false );
+		text.visible( false );
 		
 		// Continue processing the event.
 		super.hideNotify();

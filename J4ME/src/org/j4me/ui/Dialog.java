@@ -84,6 +84,17 @@ public abstract class Dialog
 	private int[] absoluteHeights = null;
 	
 	/**
+	 * A flag indicating if the screens layout is no longer valid.  It will
+	 * be calculated on the next <code>paint</code>.
+	 * <p>
+	 * This flag is an optimization.  Many invalidations can happen between
+	 * paintings.  Recalculating the layout is expensive so we just set this
+	 * flag to <code>true</code> many times instead.  Then do just a single
+	 * layout calculation at the end.
+	 */
+	boolean invalidated;
+	
+	/**
 	 * Implicitly called by derived classes to setup a new J4ME form.
 	 */
 	public Dialog ()
@@ -113,7 +124,7 @@ public abstract class Dialog
 		while ( e.hasMoreElements() )
 		{
 			Component c = (Component)e.nextElement();
-			c.show( false );
+			c.visible( false );
 		}
 		
 		// Continue deselection.
@@ -127,7 +138,7 @@ public abstract class Dialog
 	 */
 	public void append (Component component)
 	{
-		clearLayout();
+		invalidate();
 		components.addElement( component );
 	}
 	
@@ -145,7 +156,7 @@ public abstract class Dialog
 	 */
 	public void insert (Component component, int index)
 	{
-		clearLayout();
+		invalidate();
 		components.insertElementAt( component, index );
 	}
 	
@@ -161,7 +172,7 @@ public abstract class Dialog
 	 */
 	public void set (Component component, int index)
 	{
-		clearLayout();
+		invalidate();
 		components.setElementAt( component, index );
 	}
 	
@@ -193,7 +204,7 @@ public abstract class Dialog
 	 */
 	public void delete (int index)
 	{
-		clearLayout();
+		invalidate();
 		components.removeElementAt( index );
 		
 		if ( highlightedComponent == index )
@@ -211,7 +222,7 @@ public abstract class Dialog
 	 */
 	public void deleteAll ()
 	{
-		clearLayout();
+		invalidate();
 		components.removeAllElements();
 		highlightedComponent = -1;
 	}
@@ -223,7 +234,7 @@ public abstract class Dialog
 	 */
 	public Enumeration components ()
 	{
-		clearLayout();
+		invalidate();
 		return components.elements();
 	}
 	
@@ -417,6 +428,13 @@ public abstract class Dialog
 	protected synchronized void paint (Graphics g)
 	{
 		// Have we determined the layout?
+		if ( invalidated )
+		{
+			layout();
+			invalidated = false;
+		}
+		
+		// Get the height of the screen.
 		Theme theme = UIManager.getTheme();
 		int height = getHeight();
 		
@@ -428,11 +446,12 @@ public abstract class Dialog
 			int heightOfAllComponents = absoluteHeights[absoluteHeights.length - 1];
 			paintVerticalScrollbar( g, 0, 0, width, height, topOfScreen, heightOfAllComponents );
 		}
-		
-		// Walk the list of components and paint them.
+
+		// Get the rest of the form dimensions.
 		int formWidth = getWidth();
 		int bottomOfScreen = topOfScreen + height;
 		
+		// Walk the list of components and paint them.
 		Enumeration list = components.elements();
 		
 		for ( int i = 0; i < absoluteHeights.length - 1; i++ )
@@ -445,16 +464,16 @@ public abstract class Dialog
 			if ( componentTop >= bottomOfScreen )
 			{
 				// Skip drawing components below the screen.
-				c.show( false );
+				c.visible( false );
 			}
 			else if ( componentBottom <= topOfScreen )
 			{
 				// Skip drawing components above the screen.
-				c.show( false );
+				c.visible( false );
 			}
 			else  // visible
 			{
-				c.show( true );
+				c.visible( true );
 				
 				// Calculate the position of the component.
 				int componentX = margin;
@@ -474,6 +493,27 @@ public abstract class Dialog
 				}
 			}
 		}
+	}
+	
+	/**
+	 * Paints the vertical scrollbar.  The scrollbar must go on the right
+	 * side of the form and span from the top to the bottom.  Its width
+	 * is returned from this method and used to calculate the width of
+	 * the remaining form area to draw components in.
+	 *
+	 * @param g is the <code>Graphics</code> object to paint with.
+	 * @param x is the top-left X-coordinate pixel of the form area.
+	 * @param y is the top-left Y-coordinate pixel of the form area.
+	 * @param width is the width of the form area in pixels.
+	 * @param height is the height of the form area in pixels.
+	 * @param offset is the vertical scrolling position of the top pixel
+	 *  to show on the form area.
+	 * @param formHeight is the total height of all the components on the
+	 *  form.  This is bigger than <code>height</code>.
+	 */
+	protected void paintVerticalScrollbar (Graphics g, int x, int y, int width, int height, int offset, int formHeight)
+	{
+		UIManager.getTheme().paintVerticalScrollbar( g, x, y, width, height, offset, formHeight );
 	}
 	
 	/**
@@ -504,7 +544,7 @@ public abstract class Dialog
 			this.margin = margin;
 			
 			// Recalculate the layout with the new margins later.
-			clearLayout();
+			invalidate();
 		}
 	}
 	
@@ -531,7 +571,7 @@ public abstract class Dialog
 			this.spacing = spacing;
 			
 			// Recalculate the layout with the new spacings later.
-			clearLayout();
+			invalidate();
 		}
 	}
 	
@@ -572,7 +612,7 @@ public abstract class Dialog
 		Theme theme = UIManager.getTheme();
 		
 		// Have we determined the layout?
-		if ( absoluteHeights == null )
+		if ( invalidated || (absoluteHeights == null) )
 		{
 			calculateLayout( theme, formWidth, screenHeight );
 			layoutJustCalculated = true;
@@ -597,69 +637,49 @@ public abstract class Dialog
 	}
 	
 	/**
-	 * Paints the vertical scrollbar.  The scrollbar must go on the right
-	 * side of the form and span from the top to the bottom.  Its width
-	 * is returned from this method and used to calculate the width of
-	 * the remaining form area to draw components in.
-	 *
-	 * @param g is the <code>Graphics</code> object to paint with.
-	 * @param x is the top-left X-coordinate pixel of the form area.
-	 * @param y is the top-left Y-coordinate pixel of the form area.
-	 * @param width is the width of the form area in pixels.
-	 * @param height is the height of the form area in pixels.
-	 * @param offset is the vertical scrolling position of the top pixel
-	 *  to show on the form area.
-	 * @param formHeight is the total height of all the components on the
-	 *  form.  This is bigger than <code>height</code>.
+	 * Forces the layout of all components to be recalculated.  This should
+	 * be called whenever this screen is altered.
 	 */
-	protected void paintVerticalScrollbar (Graphics g, int x, int y, int width, int height, int offset, int formHeight)
+	public void invalidate ()
 	{
-		UIManager.getTheme().paintVerticalScrollbar( g, x, y, width, height, offset, formHeight );
+		// We must calculate the layout before the next paint.
+		invalidated = true;
 	}
 	
 	/**
-	 * Forces the layout of all components to be recalculated.  This should
-	 * be called whenever this screen or its components are altered.  For
-	 * example changing a label may change its size and this method will
-	 * account for that.
+	 * Lays out the components on the screen.  This also keeps the
+	 * scroll position so the user sees the same components after
+	 * being called.
 	 */
-	public void invalidate ()
+	private synchronized void layout ()
 	{
 		// Record the current screen position.
 		int component = 0, delta = 0;
 		
 		if ( absoluteHeights != null )
 		{
-			component = highlightedComponent >= 0 ? highlightedComponent : 0;
+			if ( highlightedComponent >= 0 )
+			{
+				component = highlightedComponent;
+			}
+
 			delta = absoluteHeights[component] - topOfScreen;
 		}
 		
-		// Remove the layout of all components.
-		clearLayout();
+		// Remove all component location calculations.
+		componentWidths = null;
+		absoluteHeights = null;
+		topOfScreen = 0;
 		
 		// Recalculate the position of all components.
 		hasVerticalScrollbar();
 		
-		// Reposition the screen to its original position.
+		// Reset the screen to its original position.
 		if ( component != 0 )
 		{
 			highlightedComponent = component;
 			topOfScreen = absoluteHeights[component] - delta;
 		}
-	}
-	
-	/**
-	 * Whenever the form is altered this method should be called to clear
-	 * the layout.  The layout will be re-established during the next painting.
-	 */
-	private synchronized void clearLayout ()
-	{
-		// Remove all component location calculations.
-		componentWidths = null;
-		absoluteHeights = null;
-		
-		// Reset the top of screen used for scrolling.
-		topOfScreen = 0;
 	}
 	
 	/**
@@ -965,6 +985,54 @@ public abstract class Dialog
 		repaint();
 	}
 	
+	/**
+	 * Shows or hides the menu bar at the bottom of the screen.
+	 * 
+	 * @param mode is <code>true</code> if the <code>DeviceScreen</code> is to be in full
+	 *  screen mode, <code>false</code> otherwise.
+	 */
+	public void setFullScreenMode (boolean mode)
+	{
+		super.setFullScreenMode( mode );
+		invalidate();
+	}
+
+	/**
+	 * Sets the menu bar text.
+	 * <p>
+	 * For the menu to be visible full screen mode must be off.
+	 * This can be done with the <code>setFullScreenMode</code> method.
+	 * 
+	 * @param left is the text for the negative menu option or <code>null</code>
+	 *  to remove the button.  Negative menu options are things like canceling
+	 *  a form and moving back to a previous screen.
+	 * @param right is the text for the positive menu option or <code>null</code>
+	 *  to remove the button.  Positive menu options are things like accepting
+	 *  a form, advancing to the next screen, or displaying a menu.
+	 * @see #declineNotify()
+	 * @see #acceptNotify()
+	 */
+	public void setMenuText (String left, String right)
+	{
+		super.setMenuText( left, right );
+		invalidate();
+	}
+
+	/**
+	 * Sets the title of this screen.  The default is <code>null</code> meaning no
+	 * title.
+	 * <p>
+	 * For the title to be visible full screen mode must be off.
+	 * This can be done with the <code>setFullScreenMode</code> method.
+	 * 
+	 * @param title is the new title for the screen.
+	 */
+	public void setTitle (String title)
+	{
+		super.setTitle( title );
+		invalidate();
+	}
+
 	/**
 	 * Called when a key is pressed.  It can be identified using the
 	 * constants defined in this class.

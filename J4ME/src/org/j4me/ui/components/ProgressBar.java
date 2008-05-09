@@ -119,6 +119,8 @@ public class ProgressBar
 			
 			this.label.setLabel( label );
 		}
+		
+		invalidate();
 	}
 	
 	/**
@@ -233,6 +235,7 @@ public class ProgressBar
 		}
 		
 		this.heightPercentage = percentageOfFontHeight;
+		invalidate();
 	}
 	
 	/**
@@ -506,7 +509,7 @@ public class ProgressBar
 		// Pass the event to contained components.
 		if ( label != null )
 		{
-			label.show( true );
+			label.visible( true );
 		}
 
 		// Continue processing the event.
@@ -523,7 +526,7 @@ public class ProgressBar
 		// Pass the event to contained components.
 		if ( label != null )
 		{
-			label.show( false );
+			label.visible( false );
 		}
 		
 		// If this is a spinner, stop it.

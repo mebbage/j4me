@@ -86,6 +86,8 @@ public class RadioButton
 			
 			this.label.setLabel( label );
 		}
+		
+		invalidate();
 	}
 	
 	/**
@@ -227,10 +229,10 @@ public class RadioButton
 		// Pass the event to contained components.
 		if ( label != null )
 		{
-			label.show( true );
+			label.visible( true );
 		}
 		
-		box.show( true );
+		box.visible( true );
 		
 		// Continue processing the event.
 		super.showNotify();
@@ -246,10 +248,10 @@ public class RadioButton
 		// Pass the event to contained components.
 		if ( label != null )
 		{
-			label.show( false );
+			label.visible( false );
 		}
 		
-		box.show( false );
+		box.visible( false );
 		
 		// Continue processing the event.
 		super.hideNotify();

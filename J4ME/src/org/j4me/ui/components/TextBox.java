@@ -126,6 +126,8 @@ public class TextBox
 			
 			this.label.setLabel( label );
 		}
+		
+		invalidate();
 	}
 	
 	/**
@@ -162,6 +164,7 @@ public class TextBox
 	public void setString (String text)
 	{
 		this.contents = text;
+		invalidate();
 	}
 	
 	/**
@@ -213,6 +216,8 @@ public class TextBox
 		
 		// Set the restrictive value.
 		constraints |= restriction; 
+		
+		invalidate();
 	}
 
 	/**
@@ -261,6 +266,8 @@ public class TextBox
 		{
 			constraints &= ~modifier;
 		}
+
+		invalidate();
 	}
 	
 	/**
@@ -439,7 +446,7 @@ public class TextBox
 		// Pass the event to contained components.
 		if ( label != null )
 		{
-			label.show( true );
+			label.visible( true );
 		}
 
 		// Continue processing the event.
@@ -456,7 +463,7 @@ public class TextBox
 		// Pass the event to contained components.
 		if ( label != null )
 		{
-			label.show( false );
+			label.visible( false );
 		}
 		
 		// Continue processing the event.
