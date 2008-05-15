@@ -138,15 +138,28 @@ class BluetoothDeviceDiscovery
 		for ( int i = 0; devices.hasMoreElements(); i++ )
 		{
 			RemoteDevice device = (RemoteDevice)devices.nextElement();
-			
-			String name = device.getFriendlyName( false );
+
+			// Discover the Bluetooth URL.
 			String address = device.getBluetoothAddress();
+
+			// Discover the name as will be shown to the user.
+			String name = null;
 			
+			try
+			{
+				name = device.getFriendlyName( false );
+			}
+			catch (IOException e)
+			{
+				Log.debug("Could not get friendly name for device " + address, e);
+			}
+
 			if ( name == null )
 			{
 				name = address;
 			}
 			
+			// Record this device.
 			String[] val = new String[] { name, address };
 			ret[i] = val;
 		}
