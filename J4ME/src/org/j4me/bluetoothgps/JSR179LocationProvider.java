@@ -184,9 +184,17 @@ class JSR179LocationProvider
 		}
 		
 		// Kill our worker thread to start fresh.
-		if ( worker.isAlive() )
+		try
 		{
-			worker.interrupt();
+			if ( worker.isAlive() )
+			{
+				worker.interrupt();
+				worker.join();
+			}
+		}
+		catch (Exception e)
+		{
+			// Ignore.  The worker is dead now.
 		}
 		
 		// Set the new location listner for the JSR 179 implementation
@@ -229,7 +237,19 @@ class JSR179LocationProvider
 	{
 		reset();
 		setLocationListener( null, -1, -1, -1 );
-		worker.interrupt();
+		
+		try
+		{
+			if ( worker.isAlive() )
+			{
+				worker.interrupt();
+				worker.join();
+			}
+		}
+		catch (Exception e)
+		{
+			// Ignore.  The worker is dead now.
+		}
 	}
 	
 	/**
