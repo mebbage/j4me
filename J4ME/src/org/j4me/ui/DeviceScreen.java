@@ -1346,6 +1346,30 @@ final class CanvasWrapper
 		// Forward the pointer event.
 		super.pointerReleased( x, y );
 	}
+
+	/**
+	 * Sets this canvas to take over the entire screen or to use the LCDUI's
+	 * title and menu bar.
+	 * 
+	 * @param fullScreenMode when <code>true</code> allows <code>DeviceScreen</code>
+	 *  to use the entire screen.
+	 * 
+	 * @see Canvas#setFullScreenMode(boolean)
+	 */
+	public void setFullScreenMode (boolean fullScreenMode)
+	{
+		if ( supportsTitleBar() == false )
+		{
+			// In cases where we are using the LCDUI title bar instead of
+			// our own we do not actually want full screen mode.  For example
+			// on Windows Mobile JVMs.
+			super.setFullScreenMode( false );
+		}
+		else
+		{
+			super.setFullScreenMode( fullScreenMode );
+		}
+	}
 	
 	/**
 	 * Sets the title bar text.  This is called by the <code>master</code> when
