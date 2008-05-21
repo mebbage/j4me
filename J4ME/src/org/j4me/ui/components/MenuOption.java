@@ -255,12 +255,12 @@ public class MenuOption
 	protected void paintComponent (Graphics g, Theme theme, int width, int height, boolean selected)
 	{
 		// Paint the background for the menu item.
-		int backgroundColor = selected ?
-				theme.getHighlightColor() :
-				theme.getBackgroundColor();
-		g.setColor( backgroundColor );
-		
-		g.fillRect( 0, 0, width, height );
+		if ( selected )
+		{
+			int backgroundColor = theme.getHighlightColor();
+			g.setColor( backgroundColor );
+			g.fillRect( 0, 0, width, height );
+		}
 
 		// Calculate the dimensions of the text and submenu arrow.
 		int[] submenuDimensions = getSubmenuIndicatorSize( theme, width, height );
