@@ -164,7 +164,7 @@ public class CheckBox
 	 * 
 	 * @see org.j4me.ui.components.Component#getPreferredComponentSize(org.j4me.ui.Theme, int, int)
 	 */
-	protected int[] getPreferredComponentSize (Theme theme, int viewportWidth, int viewportHeight)
+	public int[] getPreferredComponentSize (Theme theme, int viewportWidth, int viewportHeight)
 	{
 		// Get the height of the checkbox.
 		int checkboxSide = checkboxSideSize( theme );

@@ -124,7 +124,7 @@ public class HorizontalRule
 	 * 
 	 * @see org.j4me.ui.components.Component#getPreferredComponentSize(org.j4me.ui.Theme, int, int)
 	 */
-	protected int[] getPreferredComponentSize (Theme theme, int viewportWidth, int viewportHeight)
+	public int[] getPreferredComponentSize (Theme theme, int viewportWidth, int viewportHeight)
 	{
 		return new int[] { viewportWidth, height };
 	}

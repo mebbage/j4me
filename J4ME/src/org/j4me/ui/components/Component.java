@@ -203,7 +203,7 @@ public abstract class Component
 	 * @return A array with two elements where the first is the width of the
 	 *  component in pixels and the second is the height.
 	 */
-	protected abstract int[] getPreferredComponentSize (Theme theme, int viewportWidth, int viewportHeight);
+	public abstract int[] getPreferredComponentSize (Theme theme, int viewportWidth, int viewportHeight);
 	
 	/**
 	 * Tells if this component accepts user input or not.  If it does then

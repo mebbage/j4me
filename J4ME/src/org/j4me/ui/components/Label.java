@@ -279,7 +279,7 @@ public class Label
 	 * 
 	 * @see org.j4me.ui.components.Component#getPreferredComponentSize(Theme, int, int)
 	 */
-	protected int[] getPreferredComponentSize (Theme theme, int viewportWidth, int viewportHeight)
+	public int[] getPreferredComponentSize (Theme theme, int viewportWidth, int viewportHeight)
 	{
 		int width = 0;
 		height = 0;
