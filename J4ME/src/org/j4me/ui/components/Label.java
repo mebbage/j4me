@@ -433,8 +433,16 @@ public class Label
 					}
 					
 					// Record the line.
-					newLine = string.substring( lineStart, lineEnd ).trim();
-					parsedLines.addElement( newLine );
+					if ( lineEnd > lineStart )
+					{
+						newLine = string.substring( lineStart, lineEnd ).trim();
+						parsedLines.addElement( newLine );
+					}
+					else
+					{
+						// Line is only spaces so ignore it.
+						lineEnd = lineStart;
+					}
 					
 					// Setup for the next line.
 					if ( isLineBreak )
