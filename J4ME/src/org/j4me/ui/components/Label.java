@@ -296,6 +296,13 @@ public class Label
 				widthForLines = viewportWidth;
 			}
 			
+			// The width of a wide character used as a safety
+			// margin in calculating the line width.  Not all font
+			// width calculations are reliable (e.g. the default
+			// font on the Motorola SLVR).  Adjusting the line
+			// width by this amount assures no text will get clipped.
+			int charWidth = font.charWidth( 'O' );
+
 			// Get the width and height.
 			int fontHeight = font.getHeight();
 			int paragraphSpacing = fontHeight / 2;
@@ -309,7 +316,7 @@ public class Label
 				}
 				else
 				{
-					int lineWidth = font.stringWidth( lines[i] );
+					int lineWidth = font.stringWidth( lines[i] ) + charWidth;
 					
 					if ( lineWidth > width )
 					{
@@ -372,6 +379,11 @@ public class Label
 			Vector parsedLines = new Vector();
 			String newLine;
 			
+			// Flag indicating if the current line starts a paragraph.
+			// Spaces at the beginning of a paragraph are kept for
+			// indentation or labels used as spacers.
+			boolean startsParagraph = true;
+			
 			// The index of the character that starts this line.
 			int lineStart = 0;
 			
@@ -433,16 +445,9 @@ public class Label
 					}
 					
 					// Record the line.
-					if ( lineEnd > lineStart )
-					{
-						newLine = string.substring( lineStart, lineEnd ).trim();
-						parsedLines.addElement( newLine );
-					}
-					else
-					{
-						// Line is only spaces so ignore it.
-						lineEnd = lineStart;
-					}
+					newLine = string.substring( lineStart, lineEnd );
+					newLine = smartTrim( newLine, startsParagraph );
+					parsedLines.addElement( newLine );
 					
 					// Setup for the next line.
 					if ( isLineBreak )
@@ -454,10 +459,13 @@ public class Label
 						{
 							parsedLines.addElement( null );
 						}
+						
+						startsParagraph = true;
 					}
 					else  // line break in the middle of a paragraph
 					{
 						lineStart = lineEnd;
+						startsParagraph = false;
 					}
 				}
 
@@ -481,7 +489,8 @@ public class Label
 			}
 			
 			// Add the last line.
-			newLine = string.substring( lineStart ).trim();
+			newLine = string.substring( lineStart );
+			newLine = smartTrim( newLine, startsParagraph );
 			parsedLines.addElement( newLine );
 			
 			// Convert the vector into a string array.
@@ -496,5 +505,47 @@ public class Label
 		}
 		
 		return lines;
+	}
+	
+	/**
+	 * Trims whitespace from a string.  However, it does not trim leading
+	 * whitespace if the string starts a paragraph.  That leading whitespace
+	 * may be an indentation or used for spacing.
+	 * 
+	 * @param string is the string to trim.
+	 * @param startsParagraph is <code>true</code> when <code>string</code>
+	 *  is the start of a paragraph and <code>false</code> when it is not.
+	 * @return A smartly trimmed version of <code>string</code>.
+	 */
+	private static String smartTrim( String string, boolean startsParagraph )
+	{
+		String trimmed;
+		
+		if ( startsParagraph )
+		{
+			// Trim the right side of the string only.
+			int len = string.length() - 1;
+
+			while ( (len >= 0) && (string.charAt(len) <= ' ') )
+			{
+			    len--;
+			}
+			
+			if ( len <= 0 )
+			{
+				// All spaces.
+				trimmed = string;
+			}
+			else
+			{
+				trimmed = string.substring( 0, len + 1 );
+			}
+		}
+		else
+		{
+			trimmed = string.trim();
+		}
+		
+		return trimmed;
 	}
 }
