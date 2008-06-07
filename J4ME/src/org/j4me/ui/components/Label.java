@@ -62,6 +62,12 @@ public class Label
 	private int fontColor = -1;
 	
 	/**
+	 * The minimum width of this label.  If the text takes up less space the label
+	 * will be widened.  If the text takes up more space this value will be ignored.
+	 */
+	private int minWidth;
+	
+	/**
 	 * Constructs an empty label.  The test should be set using <code>setLabel</code>.
 	 */
 	public Label ()
@@ -188,6 +194,22 @@ public class Label
 	public void setFontColor (int color)
 	{
 		this.fontColor = color;
+	}
+	
+	/**
+	 * @return The minimum width of this lable.
+	 */
+	public int getMinimumWidth()
+	{
+		return minWidth;
+	}
+	
+	/**
+	 * @param width is the minimum width for the label.
+	 */
+	public void setMinimumWidth( int width )
+	{
+		this.minWidth = width;
 	}
 	
 	/**
@@ -326,6 +348,11 @@ public class Label
 					height += fontHeight;
 				}
 			}
+		}
+		
+		if ( width < minWidth )
+		{
+			width = minWidth;
 		}
 		
 		return new int[] { width, height };
