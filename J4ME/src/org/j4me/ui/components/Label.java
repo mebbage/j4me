@@ -355,6 +355,14 @@ public class Label
 			width = minWidth;
 		}
 		
+		if ( width > viewportWidth )
+		{
+			// The safety margin we add for text width (since some phones do
+			// not report a width that is actually big enough) means we can
+			// wind up with a width bigger than the screen.  Truncate that here.
+			width = viewportWidth;
+		}
+		
 		return new int[] { width, height };
 	}
 
