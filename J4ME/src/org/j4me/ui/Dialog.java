@@ -423,6 +423,18 @@ public abstract class Dialog
 	}
 
 	/**
+	 * Gets the index of the given component.  Components start at 0 and
+	 * go to the total number of components on the form minus 1.
+	 * 
+	 * @param component is the component to get the index of.
+	 * @return The index of the component on the dialog or -1 if it isn't found.
+	 */
+	public int index( Component component )
+	{
+		return components.indexOf( component );
+	}
+
+	/**
 	 * Paints the form and its components.  The layout is calculated from the
 	 * components and their order.
 	 * 
@@ -845,6 +857,8 @@ public abstract class Dialog
 			}
 			
 			// If we made it here highlight the first component.
+			// TODO Tweak this and the other direction
+			// TODO On display need to do the same tweak.
 			return 0;
 		}
 	}
