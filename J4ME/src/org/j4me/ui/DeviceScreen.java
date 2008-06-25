@@ -431,9 +431,7 @@ public abstract class DeviceScreen
 	
 	/**
 	 * Returns if this screen displays a menu bar at the bottom.  Menu bars
-	 * require both setting at least one menu option (through
-	 * <code>setMenuText</code>) and that full screen mode is off
-	 * (<code>setFullScreenMode(false)</code>).
+	 * require turning full screen mode is off (<code>setFullScreenMode(false)</code>).
 	 * 
 	 * @return <code>true</code> if the screen has a menu bar; <code>false</code>
 	 *  if it does not.
@@ -443,14 +441,10 @@ public abstract class DeviceScreen
 		// Full screen mode off?
 		if ( fullScreenMode == false )
 		{
-			// There is some menu text?
-			if ( (leftMenu != null) || (rightMenu != null) )
+			// Device supports menus?
+			if ( slave.supportsMenuBar() )
 			{
-				// Device supports menus?
-				if ( slave.supportsMenuBar() )
-				{
-					return true;
-				}
+				return true;
 			}
 		}
 		

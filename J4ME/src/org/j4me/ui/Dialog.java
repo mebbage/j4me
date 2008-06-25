@@ -857,8 +857,6 @@ public abstract class Dialog
 			}
 			
 			// If we made it here highlight the first component.
-			// TODO Tweak this and the other direction
-			// TODO On display need to do the same tweak.
 			return 0;
 		}
 	}
