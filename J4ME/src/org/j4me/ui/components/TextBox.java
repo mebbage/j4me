@@ -392,21 +392,32 @@ public class TextBox
 			}
 			else if ( isPhoneNumber() )
 			{
-				// Modifiy phone numbers with an area code. 
+				// Modify phone numbers with an area code. 
 				if ( display.length() == 10 )
 				{
-					StringBuffer builder = new StringBuffer( 15 );
-					
-					builder.append( "(" );
-					builder.append( display.substring(0, 3) );
-					builder.append( ") " );
-					
-					builder.append( display.substring(3, 6) );
-					builder.append( "-" );
-					
-					builder.append( display.substring(6, 10) );
-					
-					display = builder.toString();
+					// Are they all digits?
+					try
+					{
+						Integer.parseInt( display );
+						
+						// They are all digits if we made it here.
+						StringBuffer builder = new StringBuffer( 15 );
+						
+						builder.append( "(" );
+						builder.append( display.substring(0, 3) );
+						builder.append( ") " );
+						
+						builder.append( display.substring(3, 6) );
+						builder.append( "-" );
+						
+						builder.append( display.substring(6, 10) );
+						
+						display = builder.toString();
+					}
+					catch (NumberFormatException e)
+					{
+						// Not all digits so don't display as a phone number.
+					}
 				}
 			}
 			
