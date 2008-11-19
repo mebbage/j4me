@@ -1,0 +1,6 @@
+#Tue Nov 18 16:56:42 PST 2008
+eclipse.preferences.version=1
+obfuscate_use_project=true
+preverify_config_value=CLDC-1.0
+proguard_options=-dontusemixedcaseclassnames -overloadaggressively -allowaccessmodification -defaultpackage ''
+proguard_use_specified=true
