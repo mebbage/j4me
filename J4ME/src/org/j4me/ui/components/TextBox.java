@@ -533,7 +533,11 @@ public class TextBox
 		String label = getLabel();
 		String contents = getString();
 		int maxSize = getMaxSize();
-		TextInput entry = new TextInput( current, this, label, contents, maxSize, constraints );
+		
+		int options = constraints;
+		options &= ~TextField.PASSWORD;  // When typing passwords don't * them out; the user needs to see if the phone auto-corrects something it shouldn't
+		
+		TextInput entry = new TextInput( current, this, label, contents, maxSize, options );
 
 		// Display the text entry screen.
 		Display display = UIManager.getDisplay();
