@@ -571,7 +571,7 @@ public class TextBox
 		 * The component this screen is collecting data for.
 		 */
 		private final TextBox component;
-
+		
 		/**
 		 * Creates a native system input screen for text.
 		 * 
@@ -596,14 +596,28 @@ public class TextBox
 
 			// Add the menu buttons.
 			Theme theme = UIManager.getTheme();
-
 			String cancelText = theme.getMenuTextForCancel();
-			cancel = new Command( cancelText, Command.CANCEL, 1 );
-			addCommand( cancel );
-			
 			String okText = theme.getMenuTextForOK();
-			ok = new Command( okText, Command.OK, 2 );
-			addCommand( ok );
+
+			if ( isBlackBerry() )
+			{
+				// If we add a second button to the BlackBerry the return key
+				// will always cancel the input.  This has proven a confusing user
+				// experience.  Most people think they should type something, hit
+				// the return key, and have it appear in the text box.
+				cancel = null;
+				
+				ok = new Command( okText, Command.OK, 1 );
+				addCommand( ok );
+			}
+			else
+			{
+				cancel = new Command( cancelText, Command.CANCEL, 1 );
+				addCommand( cancel );
+				
+				ok = new Command( okText, Command.OK, 2 );
+				addCommand( ok );
+			}
 			
 			setCommandListener( this );
 		}
@@ -623,6 +637,22 @@ public class TextBox
 			// Return to the parent screen.
 			parent.show();
 			parent.repaint();
+		}
+
+		/**
+		 * @return <code>true</code> if this is a BlackBerry or <code>false</code> if not.
+		 */
+		public boolean isBlackBerry()
+		{
+			try
+			{
+				Class.forName( "net.rim.device.api.ui.UiApplication" );
+				return true;
+			}
+			catch (Throwable e)  // ClassNotFoundException, NoClassDefFoundError
+			{
+				return false;
+			}
 		}
 	}
 }
