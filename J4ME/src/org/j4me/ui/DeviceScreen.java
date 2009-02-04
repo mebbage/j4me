@@ -892,6 +892,20 @@ final class CanvasWrapper
 	 * The Tao JVM runs on Windows Mobile and behaves similarly to IBM's J9.
 	 */
 	private static boolean tao;
+
+	/**
+	 * When <code>true</code> this is running on an Android device.  When
+	 * <code>false</code> it is not.
+	 * <p>
+	 * Android is a much different platform than J4ME and it probably will not
+	 * integrate well.  However, we try to make this class work so J4ME code
+	 * can be embedded within Android applications.
+	 * <p>
+	 * Android should draw the title bar and menu bar.  It should also add
+	 * the LCDUI menu which will hook into Android's Menu and Back buttons
+	 * (similar to the BlackBerry keyboard layout).
+	 */
+	private static boolean android;
 	
 	/**
 	 * The screen that uses this object for screen operations.
@@ -987,6 +1001,17 @@ final class CanvasWrapper
 		else
 		{
 			tao = false;
+		}
+		
+		// Check if running on Android.
+		try
+		{
+			Class.forName( "android.content.Context" );
+			android = true;
+		}
+		catch (Throwable e)  // ClassNotFoundException, NoClassDefFoundError
+		{
+			android = false;
 		}
 	}
 	
@@ -1165,7 +1190,7 @@ final class CanvasWrapper
 		//   as values through 6 and getGameAction does not translate them.
 		//   There are no ASCII values used below 8 (backspace) so this is
 		//   fine.
-		if ( key > 6 )
+		if ( blackberry && (key > 6) )
 		{
 			return key;
 		}
@@ -1404,7 +1429,7 @@ final class CanvasWrapper
 	public void setMenuText (String left, String right)
 	{
 		// Does this JVM support our own menu bar?
-		if ( supportsMenuBar() == false )
+		if ( (supportsMenuBar() == false) || android )
 		{
 			// BlackBerry phones do not have MIDP 2.0 left and right menu buttons.
 			// We must capture the BlackBerry phone's "Menu" and "Return" buttons
@@ -1412,6 +1437,9 @@ final class CanvasWrapper
 			//
 			// IBM's J9 does not forward the left and right menu button codes to
 			// us.  We have to use LCDUI menu functionality.
+			//
+			// Android's keyboard is like the BlackBerry with a Menu and Back button.
+			// However, the Back button is not automatically tied to a menu option.
 			
 			// Remove the existing menu commands.
 			if ( lcduiLeftMenuCommand != null )

@@ -5,6 +5,8 @@
 // do support JSR-82 are the 8300 (Curve) and 8800 (other 8x00 can
 // be upgraded).
 
+//#ifndef ANDROID
+
 package org.j4me.bluetoothgps;
 
 import java.io.IOException;
@@ -412,4 +414,5 @@ class BluetoothDeviceDiscovery
     }
 }
 
+//#endif // Android
 //#endif // BlackBerry
