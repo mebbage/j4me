@@ -144,6 +144,7 @@ public abstract class LocationProvider
 		String[][] devices = null;
 		
 		//#ifndef BLACKBERRY
+		//#ifndef ANDROID
 		
 			// If the device doesn't support Bluetooth, just return null.
 			if ( supportsBluetoothAPI() == false )
@@ -168,7 +169,8 @@ public abstract class LocationProvider
 	
 			devices = discoverer.discoverNearbyDeviceNamesAndAddresses();
 			
-		//#endif // BlackBerry
+		//#endif // !ANDROID
+		//#endif // !BlackBerry
 			
 		return devices;
 	}
