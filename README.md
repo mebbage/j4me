@@ -1,11 +1,20 @@
 # j4me
-Automatically exported from code.google.com/p/j4me
+This repo has beeen automatically exported from the Google Code Archive http://code.google.com/p/j4me and will eventually become J4ME's permanent home.
 
+This project isn't under active development - but is inluded for legacy support.
 
+# Introduction
 
+J2ME stands for "Java 2 Mobile Edition". It is Java's specification for devices with low memory and other constraints. In practice this means it is used for programming cell phones.
+
+If you know Java (i.e. the Standard Edition) you know about 90% of J2ME. Some of the differences are:
+
+Language Features - J2ME uses Java 1.3's syntax so it does not support boxing, attributes, or other new language features.
+Library - It uses a subset of the Java Foundation Classes. However, there are some new classes which are all found in the javax.microedition.* packages.
+Packaging - Applications are assembled into a single Jar file (libraries like J4ME must be included in the Jar). Jar files are accompanied by a small .jad file which contains installation properties for the .jar.
+To learn more about J2ME follow our setup guide and build your hello world application. Then look over the examples included with the J4ME distribution to see more complex examples.
 
 # Setup
-Introduction
 
 This is a setup guide that will get your J2ME development environment up and running. At the end you will run the J4ME examples.
 
